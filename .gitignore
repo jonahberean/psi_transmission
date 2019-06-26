@@ -47,3 +47,7 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
+
+# ignore the main data folders
+data_main/
+data_monitor/
