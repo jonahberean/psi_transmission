@@ -11,7 +11,6 @@
 
 ## some organizational tasks
 1. arrange misc/ better
-2. push changes and update bf, rp, edgard of new links
 
 ## Note
 
