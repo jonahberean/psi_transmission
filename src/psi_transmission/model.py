@@ -97,11 +97,11 @@ def storage_integrate(data_list):
     was opened. A fit to determine the pre-storage lifetime is performed.
     
     Args:
-        data_list ([list]): A list of three arrays, each containing run data
+        data_list (list): A list of three arrays, each containing run data
         from 100, 20 and 5 second pre-storage time runs. This order matters.
     
     Returns:
-        ['numpy.float64']: A 3 x 3 array with rows for each of the three storage
+        numpy.float64: A 3 x 3 array with rows for each of the three storage
         times, and columns for storage time, UCN counts, and statistical
         uncertainty
     """

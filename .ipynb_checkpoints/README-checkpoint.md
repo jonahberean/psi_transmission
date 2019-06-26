@@ -1,4 +1,4 @@
-# psi_transmission
+# psi_transmission_analysis
 
 ## plan of work 
 1. By going through the eLog, and documentation in the .txt files, a map of the different set-ups and storage times should be created. We want the different files to be renamed according to some convention that allows analysis over many files belonging to the same configurations.
@@ -12,8 +12,3 @@
 ## some organizational tasks
 1. arrange misc/ better
 2. push changes and update bf, rp, edgard of new links
-
-## Note
-
-This project has been set up using PyScaffold 3.1. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
