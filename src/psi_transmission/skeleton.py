@@ -30,7 +30,7 @@ _logger = logging.getLogger(__name__)
 
 
 def fib(n):
-    """Fibonacci example function
+    """Fibonacci function example
 
     This function came with the package.
 
