@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Testing ReadTheDocs
+"""
 import sys
 import numpy as np
 
