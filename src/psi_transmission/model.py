@@ -53,7 +53,10 @@ def get_first_run_time():
 #   - numpy vector of the time bins
 #   - numpy array of all the runs' data
 #   - numpy array of all the runs' monitor data
-def load_data(run_list, day_list, normalize_flag=True):
+def load_data(run_list, day_list, normalize_flag=False):
+
+    # !!! Note that I have set the normalize_flag to be false within the 
+    # definition until we are satisfied with the normalization routine
 
     if (normalize_flag):   
 
