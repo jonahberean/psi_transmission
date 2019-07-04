@@ -5,6 +5,7 @@ Testing ReadTheDocs
 
 """
 import sys
+import os
 import numpy as np
 
 from scipy.optimize import curve_fit
@@ -32,28 +33,41 @@ def storage_lt_fit(t, N_0, tau):
 # Outputs:
 #   - the epochal time of the first run returned as an integer
 def get_first_run_time():
+    
     # grab the txt file for the first run of the experiment,
-    #  as it will be used as the t = zero                 
-    f = open('../data_main/12/8/T081217_0004.txt')
+    #  as it will be used as the t = zero. The monitor runs actually begin 
+    # before the main detector runs, so we use the first run of the monitor
+    # count data as our time zero.
+    f = open('../data_monitor/12/T071217_0001.txt')
     lines = f.readlines()
     f.close()
 
     # convert start time to epoch time
-    date_time = str(8).zfill(2) + '.12.2017 ' + lines[26][15:23]
+    date_time = str(7).zfill(2) + '.12.2017 ' + lines[26][15:23]
     pattern = '%d.%m.%Y %H:%M:%S'
     exp_start_time = int(time.mktime(time.strptime(date_time, pattern)))
     return exp_start_time
 
-# Function to load data from a series of runs into a single array
-# Inputs: 
-#   - run numbers as a list
-#   - day of runs as an integer (8,9,10,11), in a list with one-to-one
-#       correspondence to the run numbers list
-# Outputs:
-#   - numpy vector of the time bins
-#   - numpy array of all the runs' data
-#   - numpy array of all the runs' monitor data
-def load_data(run_list, day_list, normalize_flag=False):
+def load_data(run_list, day_list, normalize_flag=False, just_monitor_flag=False):
+    """Loads data from an arbitrary number of runs into numpy arrays
+    
+    Args:
+        run_list (list): list of run numbers (integers)
+        day_list (list): list of days (integers) when runs occurred, with 
+            one-to-one correspondence to the run_list order.
+        normalize_flag (bool, optional): Flag to run normalization routine. 
+            Defaults to False.
+        just_monitor_flag (bool, optional): Flag to ignore regular data and
+            look exclusively at monitor data. Defaults to False.
+    
+    Returns:
+        time_bins (numpy.float64): vector of time data 
+        run_times (numpy.float64): vector of run times, these being times in ms
+            of the start of each run, in reference to the start of the 
+            experiment
+        data (numpy.float64): array of main detector count data from all runs
+        monitor_data: array of monitor detector count data from all runs
+    """
 
     # !!! Note that I have set the normalize_flag to be false within the 
     # definition until we are satisfied with the normalization routine
@@ -76,11 +90,13 @@ def load_data(run_list, day_list, normalize_flag=False):
 
     # iterating through the run list
     for i in range(0, np.size(run_list)):
-
-        # grab the vectors of UCN counts
-        data[:,i] = np.loadtxt("../data_main/12/" + str(day_list[i]) + "/T"
-        + str(day_list[i]).zfill(2) + "1217_" + str(run_list[i]).zfill(4) + 
-        ".tof", usecols = (1))
+        
+        if not (just_monitor_flag):
+        
+            # grab the vectors of UCN counts
+            data[:,i] = np.loadtxt("../data_main/12/" + str(day_list[i]) + "/T"
+            + str(day_list[i]).zfill(2) + "1217_" + str(run_list[i]).zfill(4) + 
+            ".tof", usecols = (1))
 
         if (normalize_flag):
 
@@ -96,7 +112,10 @@ def load_data(run_list, day_list, normalize_flag=False):
         + str(day_list[i]).zfill(2) + "1217_" + str(run_list[i]).zfill(4) + 
         ".tof", usecols = (1))
 
-    return time_bins, data, monitor_data
+    # get the run times
+    run_times = get_run_times(run_list, day_list, just_monitor_flag)   
+
+    return time_bins, run_times, data, monitor_data
 
 def storage_integrate(data_list):
     """Performs storage time analysis on UCN count data.
@@ -168,7 +187,7 @@ def storage_integrate(data_list):
 #   - a vector of times in the order of the provided run number list, the times 
 #       are in elapsed seconds since the the start of the first run of the 
 #       entire experimental campaign
-def get_run_times(run_list, day_list):
+def get_run_times(run_list, day_list, just_monitor_flag = False):
     
     # initialize an empty array to hold the run start times
     times = np.zeros((len(run_list), 1))
@@ -178,10 +197,21 @@ def get_run_times(run_list, day_list):
                      
     for i in range(0, len(run_list)):
         
-        # read the .txt file for this run
-        f = open("../data_main/12/" + str(day_list[i]) + "/T"
-        + str(day_list[i]).zfill(2) + "1217_" + str(run_list[i]).zfill(4) + 
-        ".txt")
+        # This first if/else case handles the different directory structure for the 
+        # monitor v. main detector files
+        if (just_monitor_flag):
+            
+            # read the .txt file for this run
+            f = open("../data_monitor/12/" + "T"
+            + str(day_list[i]).zfill(2) + "1217_" + str(run_list[i]).zfill(4) + 
+            ".txt")         
+            
+        else:
+            # read the .txt file for this run
+            f = open("../data_main/12/" + str(day_list[i]) + "/T"
+            + str(day_list[i]).zfill(2) + "1217_" + str(run_list[i]).zfill(4) + 
+            ".txt")
+        
         lines = f.readlines()
         f.close()
         # grab the epoch time for run start
