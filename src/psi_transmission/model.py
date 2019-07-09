@@ -156,6 +156,10 @@ def load_data_2(config, run_type, normalize_flag = True):
     
     # initialize an empty array
     data = np.zeros((1,5))
+    
+    # perform the source_normalization routine to retrive fit parameters
+    if (normalize_flag):
+        norm_parameters, norm_errors = source_normalization(run_type)
 
     # Every file in the directory containing main detector run data is iterated over.
     # Here the /sorted directory contains just runs deemed good for analysis.
@@ -211,11 +215,18 @@ def load_data_2(config, run_type, normalize_flag = True):
 
                 counts = np.sum(count_data[150:-1])
 
-            # noramlize the data depending on the normalize_flag
+            # normalize the data depending on the normalize_flag
             if (normalize_flag):
-                norm_factor, error = source_normalization(run_type, 
-                run_start_time)
-                counts * norm_factor
+                extrap_counts = source_fit(0, norm_parameters[0], 
+                                          norm_parameters[1])
+                interp_counts = source_fit(run_start_time, norm_parameters[0], 
+                                           norm_parameters[1])
+                
+                
+                norm_factor = extrap_counts / interp_counts
+                
+                counts = counts * norm_factor
+                
 
             # if this is the first file loaded, then assign the values to the data array, otherwise
             # append the vector of values to the existing array
@@ -250,7 +261,7 @@ def load_data_2(config, run_type, normalize_flag = True):
     # we return the data sorted by time
     return data[data[:,0].argsort()]
 
-def source_normalization(run_type, run_start_time):
+def source_normalization(run_type):
     """Perform a run_type specific fit to data for normalization
     
     Arguments:
@@ -260,26 +271,23 @@ def source_normalization(run_type, run_start_time):
             's005' - 5 second storage
             's020' - 20 second storage
             's100' - 100 second storage
-        run_start_time {int} -- number of seconds since the start of the 
-            experiment
     
     Returns:
         numpy.float64 -- the computed normalization factor
         numpy.float64 -- error in the normalization factor
     """
-
+        
+    # All the runs from the normalization configuration are loaded.
     data = load_data_2('NORM', run_type, normalize_flag = False)
+
+    # The fit is performed.
     popt, pcov = curve_fit(source_fit, data[:,0], data[:,2], p0=[77600, -9], 
     sigma = data[:,3], absolute_sigma = True)
 
-    # The normalization factor is computed to be:
-    # (the first measurement in this configuration) / (the source fit to this
-    # run time)
-    normalization_factor = data[0,2] / source_fit(run_start_time, *popt)
-    # !!! Is error necessary here? Return to it if so
-    error = 0
+    norm_parameters = popt
+    norm_errors     = np.sqrt(np.diag(pcov))
 
-    return normalization_factor, error
+    return norm_parameters, norm_errors
 
 def storage_integrate(data_list):
     """Performs storage time analysis on UCN count data.

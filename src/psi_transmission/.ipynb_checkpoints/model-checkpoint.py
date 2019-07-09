@@ -117,6 +117,178 @@ def load_data(run_list, day_list, normalize_flag=False, just_monitor_flag=False)
 
     return time_bins, run_times, data, monitor_data
 
+config = "NORM"
+run_type = "s100"
+
+def load_data_2(config, run_type, normalize_flag = True):
+    """A function to load data and sum counts for individual runs.
+    
+    Arguments:
+        config {string} -- A string that determines the experimental 
+            configuration of the data to be loaded. The options are:
+                'NORM' - normalization
+                'JPTI' - JP Ti guide with NiP
+                'JPSU' - JP SUS guide with NiP
+                'DISK' - SS Disk
+                'GD01' - UGD01 guide
+                'GD03' - UGD03 guide
+                'EPSU' - EP SUS guide with NiP
+        run_type {string} -- A string that determines what type of data will be 
+            loaded. The options are:
+                'shot' - direct shot measurements 
+                's005' - 5 second storage
+                's020' - 20 second storage
+                's100' - 100 second storage
+        normalize_flag {boolean, optional} -- Flag to normalize the data 
+            accroding to a series of routines dependent on run_type. Defaults
+            to True.
+    
+    Returns:
+        numpy.float64 -- An n x 5 data array of the results from loading the
+            run data. The number of rows corresponds to the number of runs
+            loaded. The three columns are:
+                0 - the run start time in seconds since the experimental start
+                1 - the storage time (0 if direct shot)
+                2 - the number of UCN counts
+                3 - sqrt(N) error in number of UCN counts
+                4 - [day].[run number] of measurement
+    """
+    
+    # initialize an empty array
+    data = np.zeros((1,5))
+    
+    # perform the source_normalization routine to retrive fit parameters
+    if (normalize_flag):
+        norm_parameters, norm_errors = source_normalization(run_type)
+
+    # Every file in the directory containing main detector run data is iterated over.
+    # Here the /sorted directory contains just runs deemed good for analysis.
+    for filename in os.listdir('../data_main/sorted'):
+
+        # Only the files matching our desired configuration and run type are 
+        # selected. The '.tof' condition is just so we don't perform the
+        # analysis twice per run.
+        if ((config in filename) and (run_type in filename) and 
+        ('.tof' in filename)):
+
+            f = open( '../data_main/sorted/' + filename[0:22] + '.txt')  
+            lines = f.readlines()
+            f.close()
+            # grab the epoch time for run start
+            date_time = filename[1:3].zfill(2) + '.12.2017 ' + lines[26][15:23]
+            pattern = '%d.%m.%Y %H:%M:%S'
+            run_start_time = int(time.mktime(time.strptime(date_time, pattern)))
+            # This function returns the start time of the very first run. 
+            run_start_time = run_start_time - get_first_run_time()
+
+            # if the run_type is shot, then storage time is set to 0
+            if (run_type == "shot"):
+
+                storage_time = 0
+
+            # otherwise grab the storage time from the run type
+            else:
+
+                storage_time = int(run_type[1:4])
+
+            # The data is retrieved from the .tof file
+            count_data = np.loadtxt('../data_main/sorted/' + filename[0:22] + 
+            '.tof', usecols = (1))
+
+            # specific data cut for run 35 on the 8th
+            if ((filename[2:3] == '8') and (filename[10:12] == '35')):
+
+                counts = np.sum(count_data[150:1000])
+
+            # specific data cut for run 66 on the 8th
+            elif ((filename[2:3] == '8') and (filename[10:12] == '66')):
+
+                counts = np.sum(count_data[150:1500])
+
+            # specific data cut for run 88 on the 8th
+            elif ((filename[2:3] == '8') and (filename[10:12] == '88')):
+
+                counts = np.sum(count_data[150:2500])
+
+            # cut the data normally
+            else:
+
+                counts = np.sum(count_data[150:-1])
+
+            # normalize the data depending on the normalize_flag
+            if (normalize_flag):
+                extrap_counts = source_fit(0, norm_parameters[0], 
+                                          norm_parameters[1])
+                interp_counts = source_fit(run_start_time, norm_parameters[0], 
+                                           norm_parameters[1])
+                
+                
+                norm_factor = extrap_counts / interp_counts
+                
+                counts = counts * norm_factor
+                
+
+            # if this is the first file loaded, then assign the values to the data array, otherwise
+            # append the vector of values to the existing array
+            if (data[0,0] == 0):
+
+                data[0,0] = run_start_time
+                data[0,1] = storage_time
+                data[0,2] = counts
+                data[0,3] = np.sqrt(counts)
+
+                # saving the [day].[run number] can be useful for debugging
+                # requires enlarging the arrays
+                data[0,4] = int(filename[1:3]) + \
+                (0.001 * int(filename[9:12]))
+
+            # otherwise we make a vector and append it
+            else:
+
+                run_data = np.zeros((1,5))
+                run_data[0,0] = run_start_time
+                run_data[0,1] = storage_time
+                run_data[0,2] = counts 
+                run_data[0,3] = np.sqrt(counts)
+
+                # saving the [day].[run number] can be useful for debugging
+                # requires enlarging the arrays
+                run_data[0,4] = int(filename[1:3]) + \
+                (0.001 * int(filename[9:12]))
+                
+                data = np.vstack((data, run_data))
+    
+    # we return the data sorted by time
+    return data[data[:,0].argsort()]
+
+def source_normalization(run_type):
+    """Perform a run_type specific fit to data for normalization
+    
+    Arguments:
+        run_type {string} -- A string that determines what type of data will be 
+        loaded. The options are:
+            'shot' - direct shot measurements 
+            's005' - 5 second storage
+            's020' - 20 second storage
+            's100' - 100 second storage
+    
+    Returns:
+        numpy.float64 -- the computed normalization factor
+        numpy.float64 -- error in the normalization factor
+    """
+        
+    # All the runs from the normalization configuration are loaded.
+    data = load_data_2('NORM', run_type, normalize_flag = False)
+
+    # The fit is performed.
+    popt, pcov = curve_fit(source_fit, data[:,0], data[:,2], p0=[77600, -9], 
+    sigma = data[:,3], absolute_sigma = True)
+
+    norm_parameters = popt
+    norm_errors     = np.sqrt(np.diag(pcov))
+
+    return norm_parameters, norm_errors
+
 def storage_integrate(data_list):
     """Performs storage time analysis on UCN count data.
 
