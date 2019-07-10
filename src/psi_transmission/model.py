@@ -567,3 +567,49 @@ def transmission(run_list):
     plt.ylabel('Transmission [% / m]')
     
     return storage_times, result
+
+def load_all_data():
+    
+    norm_data_shot = load_data_2('NORM', 'shot', normalize_flag = True)
+    norm_data_5    = load_data_2('NORM', 's005', normalize_flag = True)
+    norm_data_20   = load_data_2('NORM', 's020', normalize_flag = True)
+    norm_data_100  = load_data_2('NORM', 's100', normalize_flag = True)
+    norm_data_list = [norm_data_5, norm_data_20, norm_data_100, norm_data_shot]
+
+    jpsu_data_shot = load_data_2('JPSU', 'shot', normalize_flag = True)
+    jpsu_data_5    = load_data_2('JPSU', 's005', normalize_flag = True)
+    jpsu_data_20   = load_data_2('JPSU', 's020', normalize_flag = True)
+    jpsu_data_100  = load_data_2('JPSU', 's100', normalize_flag = True)
+    jpsu_data_list = [jpsu_data_5, jpsu_data_20, jpsu_data_100, jpsu_data_shot]
+
+    jpti_data_shot = load_data_2('JPTI', 'shot', normalize_flag = True)
+    jpti_data_5    = load_data_2('JPTI', 's005', normalize_flag = True)
+    jpti_data_20   = load_data_2('JPTI', 's020', normalize_flag = True)
+    jpti_data_100  = load_data_2('JPTI', 's100', normalize_flag = True)
+    jpti_data_list = [jpti_data_5, jpti_data_20, jpti_data_100, jpti_data_shot]
+
+    disk_data_shot = load_data_2('DISK', 'shot', normalize_flag = True)
+    disk_data_5    = load_data_2('DISK', 's005', normalize_flag = True)
+    disk_data_20   = load_data_2('DISK', 's020', normalize_flag = True)
+    disk_data_100  = load_data_2('DISK', 's100', normalize_flag = True)
+    disk_data_list = [disk_data_5, disk_data_20, disk_data_100, disk_data_shot]
+
+    gd01_data_shot = load_data_2('GD01', 'shot', normalize_flag = True)
+    gd01_data_5    = load_data_2('GD01', 's005', normalize_flag = True)
+    gd01_data_20   = load_data_2('GD01', 's020', normalize_flag = True)
+    gd01_data_100  = load_data_2('GD01', 's100', normalize_flag = True)
+    gd01_data_list = [gd01_data_5, gd01_data_20, gd01_data_100, gd01_data_shot]
+
+    gd03_data_shot = load_data_2('GD03', 'shot', normalize_flag = True)
+    gd03_data_5    = load_data_2('GD03', 's005', normalize_flag = True)
+    gd03_data_20   = load_data_2('GD03', 's020', normalize_flag = True)
+    gd03_data_100  = load_data_2('GD03', 's100', normalize_flag = True)
+    gd03_data_list = [gd03_data_5, gd03_data_20, gd03_data_100, gd03_data_shot]
+
+    epsu_data_shot = load_data_2('EPSU', 'shot', normalize_flag = True)
+    epsu_data_5    = load_data_2('EPSU', 's005', normalize_flag = True)
+    epsu_data_20   = load_data_2('EPSU', 's020', normalize_flag = True)
+    epsu_data_100  = load_data_2('EPSU', 's100', normalize_flag = True)
+    epsu_data_list = [epsu_data_5, epsu_data_20, epsu_data_100, epsu_data_shot]
+    
+    return norm_data_list, jpsu_data_list, jpti_data_list, disk_data_list, gd01_data_list, gd03_data_list, epsu_data_list
