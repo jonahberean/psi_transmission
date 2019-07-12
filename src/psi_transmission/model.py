@@ -613,3 +613,60 @@ def load_all_data():
     epsu_data_list = [epsu_data_5, epsu_data_20, epsu_data_100, epsu_data_shot]
     
     return norm_data_list, jpsu_data_list, jpti_data_list, disk_data_list, gd01_data_list, gd03_data_list, epsu_data_list
+
+def storage_lifetime(data_list):
+    
+    # initialize an array to hold the run averages
+    storage_results = np.zeros((3,3))
+    
+    for i in range(0, 3):
+    
+        # plot all of the runs together
+        plt.errorbar(data_list[i][:,1], data_list[i][:,2], yerr = data_list[i][:,3], fmt = '.', label = '{} s'.format(data_list[i][0,1]))
+        
+        # compute the standard mean
+        storage_results[i,0] = data_list[i][0,1]
+        storage_results[i,1] = np.mean(data_list[i][:,2])
+        storage_results[i,2] = np.std(data_list[i][:,2])
+        
+    plt.yscale('log')
+    plt.ylabel('UCN Counts');
+    plt.xlabel('Storage time [s]')
+    plt.legend();
+    plt.show()
+    
+    plt.clf()
+    popt, pcov = curve_fit(storage_lt_fit, storage_results[:,0], storage_results[:,1], sigma = storage_results[:,2], p0=[150000, 100], absolute_sigma = True)
+    plt.plot(np.linspace(0,100,1000), storage_lt_fit(np.linspace(0,100,1000), *popt));
+    plt.errorbar(storage_results[:,0], storage_results[:,1], yerr = storage_results[:,2], fmt = '.')
+    plt.ylabel('UCN Counts');
+    plt.xlabel('Storage time [s]');
+    plt.show()
+    plt.clf()
+    
+    # plotting again with log scale
+    plt.plot(np.linspace(0,100,1000), storage_lt_fit(np.linspace(0,100,1000), *popt));
+    plt.errorbar(storage_results[:,0], storage_results[:,1], yerr = storage_results[:,2], fmt = '.')
+    plt.ylabel('UCN Counts');
+    plt.xlabel('Storage time [s]');
+    plt.yscale('log')
+    
+    # printing the fit parameters and their errors:
+    fit_parameters = np.zeros(np.shape(pcov))
+    for i in range(0, np.size(popt)):
+        fit_parameters[i,0] = popt[i]
+        fit_parameters[i,1] = np.sqrt(np.diag(pcov))[i]
+    print("Fit parameters:\n N_0 = {} +/- {},\n TAU: {} +/- {}".format(
+            fit_parameters[0,0],
+            fit_parameters[0,1],
+            fit_parameters[1,0],
+            fit_parameters[1,1]))
+
+    chi_sq_over_dof = np.sum(((storage_results[:,1] - storage_lt_fit(storage_results[:,0], 
+                                                                     *popt)) 
+                              / storage_results[:,2])**2) / (np.shape(storage_results)[0] - len(popt))
+    
+    print("chi_sq / dof = {}".format(chi_sq_over_dof))
+
+    
+    return storage_results
