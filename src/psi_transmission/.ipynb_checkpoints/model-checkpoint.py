@@ -146,7 +146,7 @@ def load_data_2(config, run_type, normalize_flag = True):
     Returns:
         numpy.float64 -- An n x 5 data array of the results from loading the
             run data. The number of rows corresponds to the number of runs
-            loaded. The three columns are:
+            loaded. The five columns are:
                 0 - the run start time in seconds since the experimental start
                 1 - the storage time (0 if direct shot)
                 2 - the number of UCN counts
@@ -154,7 +154,7 @@ def load_data_2(config, run_type, normalize_flag = True):
                 4 - [day].[run number] of measurement
     """
     
-    # initialize an empty array
+    # initialize an empty array to hold the loaded data
     data = np.zeros((1,5))
     
     # perform the source_normalization routine to retrive fit parameters
@@ -171,13 +171,16 @@ def load_data_2(config, run_type, normalize_flag = True):
         if ((config in filename) and (run_type in filename) and 
         ('.tof' in filename)):
 
+            # open the text file associated with the run
             f = open( '../data_main/sorted/' + filename[0:22] + '.txt')  
             lines = f.readlines()
             f.close()
+            
             # grab the epoch time for run start
             date_time = filename[1:3].zfill(2) + '.12.2017 ' + lines[26][15:23]
             pattern = '%d.%m.%Y %H:%M:%S'
             run_start_time = int(time.mktime(time.strptime(date_time, pattern)))
+            
             # This function returns the start time of the very first run. 
             run_start_time = run_start_time - get_first_run_time()
 
@@ -216,6 +219,10 @@ def load_data_2(config, run_type, normalize_flag = True):
                 counts = np.sum(count_data[150:-1])
 
             # normalize the data depending on the normalize_flag
+            # !!! Note that this normalization operatin is not taking into account the need
+            # to correct based on absolute counts. i.e. here the direct shot has 
+            # a linear slope of ~-8, whereas the storage time measurements will be more 
+            # like -0.2. This is wrong, must be corrected.
             if (normalize_flag):
                 extrap_counts = source_fit(0, norm_parameters[0], 
                                           norm_parameters[1])

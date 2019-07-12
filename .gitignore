@@ -51,3 +51,4 @@ MANIFEST
 # ignore the main data folders
 data_main/
 data_monitor/
+data_p_beam/
