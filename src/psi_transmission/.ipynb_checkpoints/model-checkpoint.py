@@ -38,7 +38,7 @@ def get_first_run_time():
     #  as it will be used as the t = zero. The monitor runs actually begin 
     # before the main detector runs, so we use the first run of the monitor
     # count data as our time zero.
-    f = open('../data_monitor/12/T071217_0001.txt')
+    f = open('../data_main/12/8/T081217_0022.txt')
     lines = f.readlines()
     f.close()
 
