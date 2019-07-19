@@ -12,7 +12,9 @@
 ## some organizational tasks
 1. arrange misc/ better
 
-## Note
+## notes
+
+There are three different data sets with proton beam data. (!!! which one was used, where are they all from?)
 
 This project has been set up using PyScaffold 3.1. For details and usage
 information on PyScaffold see https://pyscaffold.org/.
