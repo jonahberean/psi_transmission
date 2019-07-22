@@ -642,7 +642,7 @@ def load_p_beam_data_3(start_time):
 ###############################################################################
 ###############################################################################
 
-def find_coincidences(p_beam_data, main_data_dict, plotting_flag = False):
+def find_coincidences(p_beam_data, main_data_dict, window, plotting_flag = False):
     """Searches for coincident runs and measurements, from the main detector
         data and the proton beam current data, respectively.
     
@@ -652,106 +652,124 @@ def find_coincidences(p_beam_data, main_data_dict, plotting_flag = False):
                 - row 0: time elapsed in seconds since the first measurement
                 - row 1: beam current in uA - monitoring data
         main_data_dict (dict) -- see docstring of load_all_data()
+        window (int) -- number of seconds for coincidence time window. MUST BE 
+            < 400
         plotting_flag (boolean, optional) -- flag to enable plotting. Defaults
             to False.
     
     Returns:
         (dict) -- a dictionary of arrays for coincident proton beam
-            measurements, labelled by run type. The key options are:
-            key 0: run_type {string} -- The options are:
+            measurements, and main neutron count data, 
+            labelled by run type. The key options are:
+            key 0: data_type {string} -- The options are:
+                'proton' - proton beam current measurements
+                'neutron' - neutron count data          
+            key 1: run_type {string} -- The options are:
                 's000' - direct shot measurements 
                 's005' - 5 second storage
                 's020' - 20 second storage
                 's100' - 100 second storage
+            
     """
 
     # instantiate a new dictionary
-    reduced_dict = {}
+    coincidence_dict = {}
 
     # iterate over run types
-    # run_type_list = ['s000', 's005', 's020', 's100']
-    run_type_list = ['s000']
+    run_type_list = ['s000', 's005', 's020', 's100']
+
     for run_type in run_type_list:
 
+        # grab the neutron data
         n_arr = main_data_dict['all', run_type]
+        
+        # grab and sort the proton beam data
         p_arr = p_beam_data
-
-        # instantiate a new array to hold the reduced data set
-        # red_arr = np.empty((0,2), float)
-
-        # for i in range(0, np.shape(n_arr)[0]):
-        for i in range(0, 1):
-
-            red_arr = np.where((np.abs(n_arr[i,0] - p_arr[:,0]) < 20), 
-                                p_arr[:,1], 
-                                np.zeros(np.shape(p_arr)[0]))
-
-            red_arr = red_arr[np.nonzero(red_arr)]  
-
-            print(red_arr)
-            
-            red_arr = np.where(np.isnan(red_arr),
-                                np.zeros(np.shape(red_arr)[0]),
-                                red_arr)
-
-            red_arr = red_arr[np.nonzero(red_arr)]    
-
-            print(red_arr)                
-            # condition = np.abs(p_arr[:,0] - n_arr[i,0]) < 20
-            # condition
-
-
-        # # iterate over every run start time, and every proton beam measurement time
-        # # do this in a nested format
-        # for i in range(0, np.shape(n_arr)[0]):
+        p_arr = p_arr[p_arr[:,0].argsort()]
         
-        #     for j in range(0, np.shape(p_arr)[0]):
-        #         # check if non-zero
-        #         if (p_arr[j,0] != float('nan')):
-        #             # calculate the absolute time difference between the two times
-        #             abs_diff = abs(n_arr[i,0] - p_arr[j,0])
-                    
-        #             # calculate the non-absolute time difference between the two times
-        #             diff = n_arr[i,0] - p_arr[j,0]
-                    
-        #             # if the measurement time was within 9 seconds of the run time
-        #             if (abs_diff < 9):
+        # arrays to keep track of indices
+        p_indices = np.empty((1,0), float)
+        n_indices = np.empty((1,0), float)
 
-        #                 red_arr = np.append(red_arr, [p_arr[j,:]], axis = 0)
-        
-        # # store the completed array in the dictionary
-        # reduced_dict[run_type] = red_arr
+        # arrays to hold the coincident points found
+        p_coincident = np.empty((0,2), float)
+        n_coincident = np.empty((0,5), float)
 
-        # if (plotting_flag):
+        # iterating over every time stamp of the proton beam current 
+        # measurements
+        for i in range(0, np.size(p_arr[:,0])):
 
-        #         # instantiate the subplots 
-        #         fig, ax1 = plt.subplots()
-
-        #         # plot the proton beam current data
-        #         ax1.scatter(red_arr[:,0], red_arr[:,1], s=1, color = 'r')
-
-        #         # presentation stuff
-        #         ax1.set_xlabel('Time Elapsed (s)')
-        #         ax1.set_ylabel(r'Proton Beam Current [$\mu$A]', 
-        #             color = 'r')
-        #         ax1.tick_params(axis='y')
-        #         ax1.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-
-        #         # instantiate a second axes that shares the same x-axis
-        #         ax2 = ax1.twinx()  
+            # only where the proton beam current has non-nan values
+            if np.isnan(p_arr[i,1]) == False:
                 
-        #         # plot the neutron count data for runs of this pre-storage
-        #         # time
-        #         ax2.errorbar(n_arr[:,0], n_arr[:,2], yerr = n_arr[:,3], 
-        #                         fmt = '.', color = 'b')
+                # get the index, in the neutron count data, that matches this
+                # beam current measurement time stamp
+                n_indices_to_add = np.argwhere(np.abs(n_arr[:,0] 
+                                                - p_arr[i,0]) < window)
+                
+                # if its not empty, then a coincidence was found
+                if (np.size(n_indices_to_add) != 0):
 
-        #         # presentation stuff
-        #         ax2.set_ylabel('UCN Counts')  
-        #         ax2.set_yscale('log')
-        #         fig.tight_layout()  
+                    # keep track of indices
+                    p_indices = np.append(p_indices, i)
+                    n_indices = np.append(n_indices, n_indices_to_add)
+                    
+                    # add data to coincidence arrays
+                    p_coincident = np.append(p_coincident, 
+                                            [p_arr[i,:]], axis = 0)
+                    n_coincident = np.append(n_coincident, 
+                                            n_arr[n_indices_to_add[0], :], 
+                                            axis = 0)
+                                    
+        # save the completed arrays to the coincidence dict
+        coincidence_dict['proton', run_type] = p_coincident
+        coincidence_dict['neutron', run_type] = n_coincident
+                    
+        if (plotting_flag):
 
-    # return reduced_dict
-    return red_arr
+                # instantiate the subplots 
+                fig, ax1 = plt.subplots()
 
+                ax1.set_title(run_type[1:4] + ' second storage')
 
+                # plot the proton beam current data
+                ax1.scatter(p_coincident[:,0], p_coincident[:,1], color = 'r')
+
+                # presentation stuff
+                ax1.set_xlabel('Time Elapsed (s)')
+                ax1.set_ylabel(r'Proton Beam Current [$\mu$A]', 
+                    color = 'r')
+                ax1.tick_params(axis='y')
+                ax1.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+
+                # instantiate a second axes that shares the same x-axis
+                ax2 = ax1.twinx()  
+                
+                # plot the neutron count data for runs of this pre-storage
+                # time
+                ax2.errorbar(n_arr[:,0], n_arr[:,2], 
+                                yerr = n_arr[:,3], 
+                                marker = 'o',
+                                fmt = '.',
+                                color = 'b', 
+                                label = 'not coincident')
+
+                # plotting the coincident neutrond data afterwards in black
+                # to highlight these runs vs non-coincident runs
+                ax2.errorbar(n_coincident[:,0], n_coincident[:,2], 
+                                yerr = n_coincident[:,3],
+                                marker = 'o',
+                                fmt = '.', 
+                                color = 'k',
+                                label = 'coincident')
+
+                # presentation stuff
+                ax2.set_ylabel('UCN Counts')  
+                ax2.set_yscale('log')
+                ax2.legend()
+                fig.tight_layout()  
+
+    return coincidence_dict
+
+###############################################################################
 ###############################################################################
