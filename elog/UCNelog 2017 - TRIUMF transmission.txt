@@ -1,0 +1,776 @@
+UCNelog2017 <../UCNelog2017/> UCNelog2016 <../UCNelog2016/> UCNelog2015
+<../UCNelog2015/> UCNelog2014 <../UCNelog2014/>
+  2017 electronic logbook of the PSI UCN source experiments  	Logged in
+as "UCN Elog" 	ELOG logo
+
+	 List <.?id=88>  |  New <88?cmd=New>  |  Edit <88?cmd=Edit>  |  Delete
+<88?cmd=Delete>  |  Reply <88?cmd=Reply>  |  Duplicate
+<88?cmd=Duplicate>  |  Find <88?cmd=Find>  |  Config <88?cmd=Config>  |
+ Logout <88?cmd=Logout>  |  Help <88?cmd=Help> 
+
+Message ID: *88*     Entry time: *Fri, Dec 08, 2017, 09:56:20*
+Author:	Bernhard 
+Subject:	TRIUMF transmission 
+
+*[Fri, Dec 08, 2017, 09:56:24 ] *
+
+umbau West-1  auf TRIUMF Messungen Leiter Transmission
+
+ 
+
+Setup now on West-1
+
+with small cascade counter " Charlie " 
+
+30cm coated Plexiglas guide  directly behind the prestorage vessel
+
+Proton beam current = 1400 muA
+
+small cascade threshold = 110
+
+High VOltage set to 1400 V
+
+ 
+
+ *[Fri, Dec 08, 2017, 12:00:50 ] *
+
+3.tof  pulse geht in zentral klappe geschlossen
+
+west-1 und west-2 synchronous  after  tof.3
+
+*[Fri, Dec 08, 2017, 12:01:40 ] *
+
+open VAT W-1 for direct transmission
+
+ vacuum in prestorage vessel = 1x 10-4 mbar
+
+ 
+
+* NORMALIZATION*
+
+ 
+
+*[Fri, Dec 08, 2017, 12:05:17 ]  *Start with direct shots
+
+4.tof    ~   6'800'000 UCN
+
+ 
+
+setup prestorage vesel
+
+filling time 8.6 s
+
+storage time variable
+
+measurement time 100s
+
+ 
+
+5s storage measurement  
+
+6.tof   =  129'000 counts
+
+ 
+
+ *[Fri, Dec 08, 2017, 12:16:50 ]  *storage time = 100s
+
+7.tof   =   (  6332  - 900 )  counts
+
+8.tof 
+
+9.tof
+
+*[Fri, Dec 08, 2017, 12:30:45 ]  *20s storage time
+
+10.tof  ~ 69'000 counts
+
+11.tof
+
+*[Fri, Dec 08, 2017, 12:45:41 ]  *5s storage time
+
+ 12.tof
+
+*[Fri, Dec 08, 2017, 12:47:17 ]  *5 s storage time
+
+13.tof
+
+*[Fri, Dec 08, 2017, 12:52:10 ]  *100 s storage time
+
+14.tof
+
+we opened the shutter early so the spectrum has starting at ch ~ 1800
+UCN from the source
+
+needs to be cut for analysis
+
+*[Fri, Dec 08, 2017, 12:58:28 ]  *direct shot - no storage - no shutters
+closed
+
+ 
+
+*[Fri, Dec 08, 2017, 14:29:49 ] *
+
+change setup to guide 1
+
+ 
+
+However this was the wrong normalization
+
+we have to mount 2 times 30cm Plexi tubes to be able to mount the test
+guides with extra flanges
+
+therefore we mount the correct normalization setup
+
+ VAT - 30cm guide + 30 cm guide + Cascade counter
+
+*[Fri, Dec 08, 2017, 16:24:30 ] *
+
+pumping is good
+
+
+ 
+
+*[Fri, Dec 08, 2017, 16:26:58 ] *
+
+direct shot 
+
+16.tof    =  6'400'000
+
+*[Fri, Dec 08, 2017, 16:34:01 ]  *set to 5s storage time
+
+17.tof =  117463
+
+18.tof didnt work because labview was off... Lets consider it is a leak
+check measurement with shutter 2 closed all the time...
+
+19.tof = 117797
+
+20.tof = 117300
+
+*[Fri, Dec 08, 2017, 16:51:55 ]  *set to 20s storage time
+
+21.tof = 62344
+
+ 
+
+* NORMALIZATION correct
+*
+
+*[Fri, Dec 08, 2017, 16:56:30 ] *
+
+open guide and beam shutter on South beamline
+
+therefore the correct measurements start here:
+
+*[Fri, Dec 08, 2017, 16:57:05 ]  *storage time 20s
+
+tof.22  = 56458
+
+tof.23  = 55976
+
+tof.24 = 56127
+
+*[Fri, Dec 08, 2017, 17:12:22 ] *storage time 100 s
+
+tof.25 = 5066
+
+tof.26 = 5109
+
+tof.27 = 5012
+
+tof.28 = 5168
+
+tof.29 = 5235
+
+tof.30 = 5151
+
+tof.31 = 5206
+
+*[Fri, Dec 08, 2017, 17:47:29 ] *storage 5 s
+
+tof.32 = 106079
+
+tof.33 = 105637
+
+tof.34 = 106371
+
+tof 35 = 105561 (configuration change, background included)
+
+*[Fri, Dec 08, 2017, 18:13:48 ] *the proton current dropped to 0 for 2
+cycles. After it was back, we noticed it wasnt sync to the countdown on
+the screen anymore... We have to be careful.
+
+*[Fri, Dec 08, 2017, 18:38:11 ] *mounting the first guide (Japanese SS
+with NiP coating).
+
+*[Fri, Dec 08, 2017, 19:08:42 ]  *open shutter 1, in order to get 1
+measurement with no storage.
+
+tof.48 = 2872300
+
+*[Fri, Dec 08, 2017, 19:18:59 ] *storage 100 s
+
+tof.50 = 3309
+
+going to have diner now...
+
+tof.60 = 3406
+
+*[Fri, Dec 08, 2017, 20:15:26 ] *storage 5 s
+
+tof.61 = 74493
+
+tof.62 = 73988
+
+tof.63 = 74710
+
+*[Fri, Dec 08, 2017, 20:28:19 ] ***storage 20 s
+
+tof.64 = 39917
+
+tof.65 =40292
+
+tof.66 = 39984 (configuration change, background included)
+
+*[Fri, Dec 08, 2017, 21:10:33 ]  *remove the first guide (Japanese SS
+with NiP coating).
+
+*[Fri, Dec 08, 2017, 21:29:09 ]  *open shutter 1, in order to get 1
+measurement with no storage.
+
+tof.76 = 4811900
+
+ 
+
+*[Fri, Dec 08, 2017, 21:37:03 ]  *storage 5 s
+
+tof.77 = 104842
+
+tof.78 = 104963
+
+tof.79 = 104891
+
+*[Fri, Dec 08, 2017, 21:48:22 ] *storage 20 s
+
+tof.80 = 55638
+
+tof.81 = 55881
+
+tof.82 = 55524
+
+*[Fri, Dec 08, 2017, 22:03:30 ] *storage 100 s
+
+tof.83 =5047
+
+tof.84 = 4971
+
+tof.85 = 5141
+
+tof.86 = 5066
+
+tof.86 = 5012
+
+tof.87 = 5091
+
+tof.88 to be checked in the data (remove noise at the end)
+
+*[Fri, Dec 08, 2017, 23:18:57 ]  *mounting the second guide (Japanese Ti
+with NiP coating).
+
+*[Fri, Dec 08, 2017, 23:20:41 ]  ***open shutter 1, in order to get 1
+measurement with no storage.
+
+tof.98 = 1614500
+
+*[Fri, Dec 08, 2017, 23:28:22 ]  *storage 100 s
+
+tof.99 = 2435 (background 314)
+
+*[Fri, Dec 08, 2017, 23:33:42 ]  *leaving, getting stat over night.
+
+tof.90 (091217) = 2571 <- last measurement before the beam stops, at
+around 7:30 AM.
+
+*[Sat, Dec 09, 2017, 08:00:43 ] *storage 20 s when the beam restarts
+(seems not before 9:30 according to the PSI cyclotron webpage)...
+
+*[Sat, Dec 09, 2017, 11:49:43 ]  *beam went back at around 11:30, but
+the first run with UCN produced is tof.99 (started at 11:50).
+
+tof.99 = 27200
+
+tof.100 =
+
+tof.101 = 27237
+
+*[Sat, Dec 09, 2017, 12:02:56 ]  *storage 5 s
+
+tof.102 = 48830
+
+tof.110 = 48266
+
+*[Sat, Dec 09, 2017, 12:51:18 ]  *stop turbo, ramp down HV, prepare for
+normalization measurement.
+
+*[Sat, Dec 09, 2017, 13:33:19 ]  *open shutter 1, in order to get 1
+measurement with no storage.
+
+tof.120 = 4330000
+
+*[Sat, Dec 09, 2017, 13:38:58 ]  *storage 5 s
+
+tof.121 = 94702
+
+tof.122 = 94674
+
+tof.123 = 94643
+
+*[Sat, Dec 09, 2017, 13:51:55 ] *storage 20 s
+
+tof.124 = 50908
+
+tof.125 = 51080
+
+*[Sat, Dec 09, 2017, 14:05:10 ]  *cyclotron out... Cyclotron status
+webpage says 1 hour maintenance.
+
+*[Sat, Dec 09, 2017, 17:36:52 ]  *restarted. run 126 is not relevant
+cause not stable.
+
+tof.127 =51154 consistent with before.
+
+*[Sat, Dec 09, 2017, 17:40:22 ]  *storage 100 s
+
+tof.128 = 4766
+
+.......
+
+tof.135 =4867
+
+*[Sat, Dec 09, 2017, 18:21:15 ]  *prepare to break vacuum, in order to
+install SS disk.
+
+*[Sat, Dec 09, 2017, 19:07:26 ]  *disk installed, ready to get
+measurement in direct. Open shutter 1, in order to get 1 measurement
+with no storage.
+
+tof.145 = 2761911
+
+*[Sat, Dec 09, 2017, 19:13:23 ]  *storage 100 s
+
+tof.146 = 3836
+
+tof.147 = 3747
+
+tof.148 = 3800
+
+tof.149 = 3837
+
+tof.150 = 3791
+
+tof.151 = 3737
+
+tof.152 = 3798
+
+tof.153 = 3860
+
+*[Sat, Dec 09, 2017, 19:51:08 ]  *storage 20 s
+
+tof.154 = 38772
+
+tof.155 = 38669
+
+tof.156 = 38810
+
+*[Sat, Dec 09, 2017, 20:05:40 ]  *storage 5 s
+
+tof.157 = 70610
+
+tof.158 = 71058
+
+tof.159 = 70822
+
+*[Sat, Dec 09, 2017, 20:23:47 ]  *prepare to break vacuum in order to
+install the two flanges (normally connected to TRIUMF guides) in order
+to perform a normalization measurement.
+
+*[Sat, Dec 09, 2017, 21:19:39 ]  *two flanges installed (tapped and
+clamped...), ready to get measurement in direct. Open shutter 1, in
+order to get 1 measurement with no storage.
+
+*[Sat, Dec 09, 2017, 21:23:39 ] *beam stopped. Pretty annoying... Close
+shutter 1 for the moment, in order to avoid possible vacuum problem.
+
+*[Sat, Dec 09, 2017, 21:58:48 ]  *seems the cyclotron can deliver a
+stable beam again. Open shutter 1, in order to get 1 measurement with no
+storage.
+
+tof.175 = 3218500
+
+*[Sat, Dec 09, 2017, 22:02:52 ]  *storage 100 s
+
+tof.176 = 4042
+
+tof.177 = 4098
+
+tof.178 = 3957
+
+tof.179 = 4101
+
+tof.180 = 4103
+
+tof.181 = 4120
+
+tof.182 = 4074
+
+tof.183 = 4137
+
+*[Sat, Dec 09, 2017, 22:41:17 ]  *storage 20 s
+
+tof.184 = 42501
+
+tof.185 = 42306
+
+tof.186 = 42544
+
+*[Sat, Dec 09, 2017, 22:55:28 ]  *storage 5 s
+
+tof.187 = 77710
+
+tof.188 = 77900
+
+tof.189 = 77755
+
+*[Sat, Dec 09, 2017, 23:11:38 ]  *break the vacuum in order to install
+UGC01.
+
+*[Sat, Dec 09, 2017, 23:50:59 ] *UGD01 installed, ready to get
+measurement in direct. Open shutter 1, in order to get 1 measurement
+with no storage.
+
+tof.198 = 2942550
+
+*[Sat, Dec 09, 2017, 23:58:17 ]  *storage 100 s
+
+tof.199 = 3487
+
+..... over night
+
+tof.107 (101217) = 3365
+
+*[Sun, Dec 10, 2017, 08:57:29 ] *storage 20 s
+
+tof.108 = 36907
+
+tof.109 = 37298
+
+tof.110 = 37136
+
+*[Sun, Dec 10, 2017, 09:11:19 ] *storage 5 s
+
+tof.111 = 67774
+
+tof.112 = 67410
+
+tof.113 = 67947
+
+*[Sun, Dec 10, 2017, 09:27:14 ]  *prepare to break vacuum in order to
+install the two flanges (normally connected to TRIUMF guides) in order
+to perform a normalization measurement.
+
+*[Sun, Dec 10, 2017, 10:09:01 ] *two flanges installed (tapped and
+clamped...), ready to get measurement in direct. Open shutter 1, in
+order to get 1 measurement with no storage.
+
+tof.122 =2871000
+
+*[Sun, Dec 10, 2017, 10:14:23 ]  *storage 100 s
+
+tof.123 = 3763
+
+tof.124 = 3695
+
+tof.125 = 3808
+
+tof.126 = 3856
+
+tof.127 = 3696
+
+tof.128 = 3652
+
+tof.129 = 3750
+
+tof.130 = 3790
+
+*[Sun, Dec 10, 2017, 10:52:47 ]  *storage 20 s
+
+ tof.131 = 38625
+
+tof.132 = 38525
+
+tof.133 = 38710
+
+*[Sun, Dec 10, 2017, 11:06:21 ]  *storage 5 s
+
+tof.134 = 70218
+
+tof.135 = 70471
+
+tof.136 = 69393
+
+*[Sun, Dec 10, 2017, 11:21:25 ] *break the vacuum in order to install UGC03.
+
+*[Sun, Dec 10, 2017, 12:03:19 ]  ***UGD03 installed, ready to get
+measurement in direct. Open shutter 1, in order to get 1 measurement
+with no storage.
+
+tof.145 = 2568457
+
+*[Sun, Dec 10, 2017, 12:09:26 ] *storage 100 s
+
+tof.146 =3122
+
+lunch break
+
+tof.155 = 3218
+
+*[Sun, Dec 10, 2017, 12:58:10 ] *storage 20 s
+
+tof.156 = 35516
+
+tof.157 = 35591
+
+tof.158 = 35419
+
+*[Sun, Dec 10, 2017, 13:11:58 ] *storage 5 s
+
+tof.159 = 64555
+
+tof.160 = 64542
+
+tof.161 = 64873
+
+*[Sun, Dec 10, 2017, 13:27:43 ]  *prepare to break vacuum in order to
+install the two flanges (normally connected to TRIUMF guides) in order
+to perform a normalization measurement.
+
+*[Sun, Dec 10, 2017, 14:04:37 ]  *two flanges installed (tapped and
+clamped...), ready to get measurement in direct. Open shutter 1, in
+order to get 1 measurement with no storage.
+
+Beam stopped.
+
+Beam resumed.
+
+tof.170 = 2817484
+
+*[Sun, Dec 10, 2017, 14:14:20 ] *storage 100 s
+
+tof.172 = 3783
+
+tof.173 = 3694
+
+tof.174 = 3709
+
+tof.175 = 3654
+
+tof.176 = 3764
+
+tof.177 = 3696
+
+tof.178 = 3797
+
+tof.179 = 3680
+
+*[Sun, Dec 10, 2017, 14:57:56 ] *storage 20 s
+
+tof.180 = 37699
+
+tof.181 = 37487
+
+tof.182 = 37091
+
+*[Sun, Dec 10, 2017, 15:12:21 ] *storage 5 s
+
+tof.183 = 68085
+
+tof.184 = 68361
+
+tof.185 = 68190
+
+*[Sun, Dec 10, 2017, 15:27:29 ]  *break the vacuum in order to install
+the third TRIUMF guide (ep with NiP coating).
+
+*[Sun, Dec 10, 2017, 16:05:46 ]  *third TRIUMF guide (ep with NiP
+coating) installed, ready to get measurement in direct. Open shutter 1,
+in order to get 1 measurement with no storage.
+
+tof.193 = 2582200
+
+tof.194 = 2646827
+
+*[Sun, Dec 10, 2017, 16:14:57 ] *storage 100 s
+
+tof.195 = 3089
+
+*[Sun, Dec 10, 2017, 16:15:42 ] *storage 5 s
+
+tof.196 = 64715
+
+tof.197 = 64496
+
+tof.198 = 64565
+
+*[Sun, Dec 10, 2017, 16:33:31 ] *storage 20 s
+
+tof.199 = 35192
+
+tof.200 = 35127
+
+tof.201 = 35127
+
+*[Sun, Dec 10, 2017, 16:47:10 ] *storage 100 s
+
+tof.202 = 3210
+
+break, data being taken...
+
+ tof.226 = 3150
+
+more break...
+
+*[Sun, Dec 10, 2017, 20:21:04 ]  *back, but beam stopped 15 minutes ago...
+
+*[Sun, Dec 10, 2017, 20:21:23 ] *just came back...
+
+tof.241 = 3140
+
+*[Sun, Dec 10, 2017, 20:22:16 ] *prepare to break vacuum in order to
+install the two flanges (normally connected to TRIUMF guides) in order
+to perform a normalization measurement.
+
+*[Sun, Dec 10, 2017, 21:01:07 ]  *two flanges installed (tapped and
+clamped...), ready to get measurement in direct. Open shutter 1, in
+order to get 1 measurement with no storage.
+
+tof.249 = 2593800
+
+*[Sun, Dec 10, 2017, 21:06:57 ]  *storage 5 s
+
+tof.250 = 63325
+
+tof.251 = 63750
+
+tof.252 = 63714
+
+*[Sun, Dec 10, 2017, 21:18:14 ] *storage 20 s
+
+tof.253 = 34441
+
+tof.254 = 34784
+
+tof.255 = 34679
+
+*[Sun, Dec 10, 2017, 21:33:37 ] *storage 100 s
+
+tof.256 = 3500
+
+... cleaning the area ...
+
+tof.260 = 3518
+
+... more cleaning ...
+
+tof.265 = 3555
+
+*[Sun, Dec 10, 2017, 22:30:50 ] *prepare to break vacuum in order to
+perform more normalization measurements (we connect both plexi guides
+together, as at the beginning).
+
+*[Sun, Dec 10, 2017, 23:01:23 ]  *ready to get measurement in direct.
+Open shutter 1, in order to get 1 measurement with no storage.
+
+tof.273 = 3181818
+
+tof.274 = 3244000
+
+*[Sun, Dec 10, 2017, 23:11:16 ]  *start a set of storage 20 s
+measurement over night in order to check the reproducibility of the
+measurements.
+
+tof.275 = 39139
+
+*[Sun, Dec 10, 2017, 23:14:12 ]  *keep taking data overnight with this
+setup.
+
+*[Mon, Dec 11, 2017, 13:07:58 ]  *check some data in order to estimate
+any possible decrease of the UCN yield over time.
+
+tof.278 (10/12/2017 at 23:31) = 39217+/-198
+
+tof.7 (11/12/2017 at 00:31) = 39137+/-198
+
+tof.19 (11/12/2017 at 01:36) = 39201+/-198
+
+5 sigma jump here.
+
+tof.31 (11/12/2017 at 02:36) = 38273+/-196
+
+tof.43 (11/12/2017 at 03:36) = 38611+/-196
+
+tof.57 (11/12/2017 at 04:47) = 38310+/-196
+
+tof.69 (11/12/2017 at 05:47) = 38274+/-196
+
+tof.81 (11/12/2017 at 06:47) = 38093+/-195
+
+4 sigma jump here.
+
+tof.93 (11/12/2017 at 07:47) = 37285+/-193
+
+ 
+
+*[Mon, Dec 11, 2017, 16:41:49 ] *
+
+no conditioning today but
+
+halted proton beam because of works in area South
+
+start kicking again with
+
+8s pulses - 300s period  1400 muA proton beam current
+
+next file = 95.tof  - no good kick
+
+*[Mon, Dec 11, 2017, 16:53:32 ] *
+
+tof.98  looks OK : 32618 <- still tunning?
+
+tof.99 = 39741
+
+tof.100 = 40230
+
+tof.101-102-103 <- no beam coming...
+
+tof.104 = 39710
+
+tof.105 = 39358
+
+tof.106 = 39679
+
+seems stable, will let it run..
+
+tof.148 = 39000
+
+tof.149 = 38968
+
+...
+
+tof.174 = 39001
+
+ 
+
+*[Tue, Dec 12, 2017, 09:07:01 ]  *end of experiment.
+
+ELOG V2.9.2-2455 <https://midas.psi.ch/elog/>
+
