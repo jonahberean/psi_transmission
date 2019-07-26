@@ -25,12 +25,18 @@ In the **notebooks** and **scripts** folders, there are tools and demonstrations
 
 Some relevant articles, and reports are provided. 
 
+## psi_transmission_report
+
+A git submodule linking to the repository containing a report on the analysis performed. 
+
 ## to-do
 
-- my latex report should be pushed via overleaf to this repo.
+- re-walk through all of the error analysis
+- confirm solid works model, put necessary simulation stuff here, .gitignore the rest with path instructions
+- begin simulations
+- histogram of proton beam
+- better error presentation of the sD2 normalization slopes ('bands? - RP')
 - a commented version of the elog pdf, clarifying any ambiguous statements
-- we should consistently use the time of the first 2s proton beam measurement as the reference point for all analsysis. then we could play around with changing that referenc e point and seeing what effect it may have on the normalization 
+- play with changing the t=0 time and the consequences for the sD2 normalization analysis
 - proper commenting of a header docstring on functions.py. Should list all functions.
-- sorted and loaded monitor detector?
-- continue going through each notebook and reconciling the existing analysis with the changes that have been made. We want to trim down to the bare minimum, and then begin the write-up
 - monitor detector? Some description of what we found there must be put in a notebook.
