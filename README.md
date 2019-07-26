@@ -27,9 +27,13 @@ Some relevant articles, and reports are provided.
 
 ## to-do
 
+- re-walk through all of the error analysis
+- 
+
 - my latex report should be pushed via overleaf to this repo.
 - a commented version of the elog pdf, clarifying any ambiguous statements
 - we should consistently use the time of the first 2s proton beam measurement as the reference point for all analsysis. then we could play around with changing that referenc e point and seeing what effect it may have on the normalization 
 - proper commenting of a header docstring on functions.py. Should list all functions.
 - sorted and loaded monitor detector?
 - continue going through each notebook and reconciling the existing analysis with the changes that have been made. We want to trim down to the bare minimum, and then begin the write-up
+- monitor detector? Some description of what we found there must be put in a notebook.

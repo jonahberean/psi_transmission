@@ -33,3 +33,4 @@ Some relevant articles, and reports are provided.
 - proper commenting of a header docstring on functions.py. Should list all functions.
 - sorted and loaded monitor detector?
 - continue going through each notebook and reconciling the existing analysis with the changes that have been made. We want to trim down to the bare minimum, and then begin the write-up
+- monitor detector? Some description of what we found there must be put in a notebook.
