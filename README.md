@@ -19,7 +19,7 @@ There are .html, .txt, and .pdf versions of the elog available in the **elog** s
 
 ## notebooks and scripts
 
-In the **notebooks** and **scripts** folders, there are tools and demonstrations of the pre-storage lifetime and transmission analyses performed. Refer to the self-contained documentation for details.
+In the **notebooks** and **scripts** folders, there are tools and demonstrations of the pre-storage lifetime and transmission analyses performed. Refer to the self-contained documentation for details. If trouble is experienced in viewing the notebooks on Github directly, please use [nbviewer](https://nbviewer.jupyter.org/)
 
 ## documents and img
 
@@ -32,11 +32,7 @@ A git submodule linking to the repository containing a report on the analysis pe
 ## to-do
 
 - re-walk through all of the error analysis
-- confirm solid works model, put necessary simulation stuff here, .gitignore the rest with path instructions
-- begin simulations
-- histogram of proton beam
 - better error presentation of the sD2 normalization slopes ('bands? - RP')
-- a commented version of the elog pdf, clarifying any ambiguous statements
-- play with changing the t=0 time and the consequences for the sD2 normalization analysis
-- proper commenting of a header docstring on functions.py. Should list all functions.
-- monitor detector? Some description of what we found there must be put in a notebook.
+
+## to-do blocked
+- begin simulations, put relevant files in this repo or direct reader to SW model, STL, sim data, etc.
