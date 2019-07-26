@@ -6,13 +6,11 @@ This repository contains scripts, Jupyter notebooks, and other documents used fo
 
 Notably missing from the repository are the experimental data, which can be found on the main UCN cluster at the following path: **/ucn/orithyia_data/psi_transmission/name-of-data-folder**
 
-There are four such data folders:
+There are two such data folders:
 
-1. **data_main_detector** - UCN count data as collected by the main detector.
-2. **data_monitor_detector** - UCN count date as collected by the monitor detector.
-3. **data_p_beam_2s** - Proton beam current measurements collected every 2 seconds throughout the experiment.
-4. **data_p_beam_10s** - Proton beam current measurements collected every 10 seconds throughout the experiment.
-
+1. **data_ucn** - UCN count data as collected by a main detector and a monitor detector
+2. **data_p_beam** - Proton beam current measurements collected throughout the experiment.
+   
 There is a separate README.md file within each of these data sub-directories, describing the respective contents. 
 
 ## elog
@@ -30,3 +28,8 @@ Some relevant articles, and reports are provided.
 ## to-do
 
 - my latex report should be pushed via overleaf to this repo.
+- a commented version of the elog pdf, clarifying any ambiguous statements
+- we should consistently use the time of the first 2s proton beam measurement as the reference point for all analsysis. then we could play around with changing that referenc e point and seeing what effect it may have on the normalization 
+- proper commenting of a header docstring on functions.py. Should list all functions.
+- sorted and loaded monitor detector?
+- continue going through each notebook and reconciling the existing analysis with the changes that have been made. We want to trim down to the bare minimum, and then begin the write-up

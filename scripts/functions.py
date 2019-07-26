@@ -57,51 +57,32 @@ def storage_lt_fit(t, N_0, tau):
 ###############################################################################
 
 
-def get_start_times():
-    """Retrieves the UNIX epoch time stamp of various relevant start times
+def get_start_time():
+    """Retrieves the UNIX epoch time stamp of the first proton beam current
+    measurement, of the 2 second period data. This is used as a reference, 
+    t = 0, time for all analysis
     
     Returns:
-        dict: the UNIX epoch time stamps in a dictionary. Key options are:
-            'edgard_p_beam' - first proton beam current measurement (edgard)
-            'bernhard_p_beam' - first proton beam current measurement 
-                (bernhard)
+        int: the UNIX epoch time stamp
     """
     
-    # initialize the dictionary
-    start_time_dict = {}
-    
-    ## 'edgard_p_beam': Proton beam current
-    
     # read the 8th of December data as a list of strings
-    f = open('../data_p_beam_from_edgard/20171208.csv')
-    lines = f.readlines()
-    f.close()
-    
-    # convert the measurement time to epoch time
-    date_time = lines[0][0:10] + ' ' + lines[0][11:19]
-    pattern = '%Y/%m/%d %H:%M:%S'
-    measurement_time = int(time.mktime(time.strptime(date_time, pattern)))
-    start_time_dict['edgard_p_beam'] = measurement_time
-
-    ## 'bern_p_beam': Proton beam current from Bernhard
-
-    # read the 8th of December data as a list of strings
-    f = open('../data_p_beam/2cbb80_analog_20171208_0007.csv')
+    f = open('../data_p_beam/2_second/20171208.csv')
     lines = f.readlines()
     f.close()
     
     # convert the measurement time to epoch time
     date_time = lines[1][0:10] + ' ' + lines[1][11:19]
-    pattern = '%d.%m.%Y %H:%M:%S'
-    measurement_time = int(time.mktime(time.strptime(date_time, pattern)))
-    start_time_dict['bernhard_p_beam'] = measurement_time
+    # print(date_time)
+    pattern = '%Y-%m-%d %H:%M:%S'
+    start_time = int(time.mktime(time.strptime(date_time, pattern)))
     
-    return start_time_dict
+    return start_time
 
 ###############################################################################
 ###############################################################################
 
-def load_data(config, run_type, start_time, norm_dict_in = None):
+def load_main(config, run_type, norm_dict_in = None):
     """A function to load data and sum counts for runs of a given
         configuration and pre-storage time
     
@@ -121,9 +102,6 @@ def load_data(config, run_type, start_time, norm_dict_in = None):
                 's005' - 5 second storage
                 's020' - 20 second storage
                 's100' - 100 second storage
-        start_time {int} -- Unix epoch time stamp of the reference t=0 
-            measurement for this data. One should access from the 
-            dictionary returned by get_start_times().
         norm_dict_in {dict} -- dictionary of values of the results from the
             ucn yield analysis. Defaults to None which avoids normalization.
             The key pairs to be used are:
@@ -148,6 +126,10 @@ def load_data(config, run_type, start_time, norm_dict_in = None):
                 3 - sqrt(N) error in number of UCN counts
                 4 - [day].[run number] of measurement
     """
+    # start_time is hard-coded here as the UNIX time stamp of the first 
+    # proton beam current measurement, of the 2 second data. 
+    start_time = get_start_time()
+
     if norm_dict_in != None:
         
         norm_dict = dict(norm_dict_in)
@@ -155,7 +137,7 @@ def load_data(config, run_type, start_time, norm_dict_in = None):
     # instantiate a new numpy array 
     all_data = np.empty((0,5), float)
             
-    for filename in os.listdir('../data_main/sorted'):
+    for filename in os.listdir('../data_ucn/main_detector_sorted'):
 
         # Only the files matching our desired configuration and run 
         # type are selected. The '.tof' condition is just so we 
@@ -165,7 +147,7 @@ def load_data(config, run_type, start_time, norm_dict_in = None):
         ('.tof' in filename)):
 
             # grab from the text file associated with the run
-            f = open( '../data_main/sorted/' + filename[0:22] 
+            f = open( '../data_ucn/main_detector_sorted/' + filename[0:22] 
                      + '.txt')  
             lines = f.readlines()
             f.close()
@@ -188,7 +170,7 @@ def load_data(config, run_type, start_time, norm_dict_in = None):
                 storage_time = int(run_type[1:4])
 
             # The data is retrieved from the .tof file
-            count_data = np.loadtxt('../data_main/sorted/' + 
+            count_data = np.loadtxt('../data_ucn/main_detector_sorted/' + 
                                     filename[0:22] + '.tof',
                                     usecols = (1))
 
@@ -296,13 +278,10 @@ def load_data(config, run_type, start_time, norm_dict_in = None):
 ###############################################################################
 ###############################################################################
 
-def load_all_data(start_time, norm_dict = None):
+def load_all_main(norm_dict = None):
     """A function to load data and sum counts for all the run data available
     
     Arguments:
-        start_time {int} -- Unix epoch time stamp of the reference t=0 
-            measurement for this data. One should access from the 
-            dictionary returned by get_start_times().
         norm_dict {dict} -- dictionary of values of the results from the
             ucn yield analysis. Defaults to None which avoids normalization.
             The key pairs to be used are:
@@ -361,7 +340,7 @@ def load_all_data(start_time, norm_dict = None):
 
         for run_type in run_type_list:
 
-            arr = load_data(config, run_type, start_time, norm_dict)
+            arr = load_main(config, run_type, norm_dict)
 
             data_dict[config, run_type] = arr
 
@@ -577,13 +556,8 @@ def load_p_beam_data(start_time):
 ###############################################################################
 ###############################################################################
 
-def load_bern_p_beam_data(start_time):
-    """Loads all of the proton beam data (Bernhard's) into an array
-    
-    Arguments:
-        start_time {int} -- Unix epoch time stamp of the reference t=0 
-            measurement for this data. One should access from the 
-            dictionary returned by get_start_times().
+def load_p_beam_10s():
+    """Loads all of the 10 second period proton beam data into an array
     
     Returns:
         p_beam_data (numpy.float64): a (2 x n) array of all of the proton beam 
@@ -594,16 +568,19 @@ def load_bern_p_beam_data(start_time):
                     for absolute value)
     """
     
+    # get start time
+    start_time = get_start_time()
+
     # instantiate array to hold the resulting data, empty and single column 
     # at first, for data to be successively stacked
     p_beam_data = np.empty((0,3), float)
     
     # loop through the files and load the data
-    for filename in os.listdir('../data_p_beam'):
+    for filename in os.listdir('../data_p_beam/10_second'):
         
         # all of the csv file is converted to a list of strings for extracting
         # the time data
-        f = open('../data_p_beam/' + filename)
+        f = open('../data_p_beam/10_second/' + filename)
         lines = f.readlines()
         f.close()
         
@@ -624,7 +601,7 @@ def load_bern_p_beam_data(start_time):
             arr[i, 0] = measurement_time - start_time
 
         # the current data is loaded into a numpy array
-        arr[:,1:3] = np.loadtxt('../data_p_beam/' + filename, 
+        arr[:,1:3] = np.loadtxt('../data_p_beam/10_second/' + filename, 
                               delimiter = ';', 
                               skiprows=1, 
                               usecols=(86,88));
@@ -650,14 +627,8 @@ def load_bern_p_beam_data(start_time):
 ###############################################################################
 ###############################################################################
 
-def load_p_beam_data_3(start_time):
-    """Loads all of the third proton beam data set (p_beam_data_3) into a numpy 
-        array
-    
-    Arguments:
-        start_time {int} -- Unix epoch time stamp of the reference t=0 
-            measurement for this data. One should access from the 
-            dictionary returned by get_start_times().
+def load_p_beam_2s():
+    """Loads all of the 2 second period proton beam data into a numpy array
     
     Returns:
         p_beam_data (numpy.float64): a (2 x n) array of all of the proton beam 
@@ -665,17 +636,19 @@ def load_p_beam_data_3(start_time):
                 - row 0: time elapsed in seconds since the first measurement
                 - row 1: beam current in uA - monitoring data
     """
+    # get start time
+    start_time = get_start_time()
     
     # instantiate array to hold the resulting data, empty and single column 
     # at first, for data to be successively stacked
     p_beam_data = np.empty((0,2), float)
     
     # loop through the files and load the data
-    for filename in os.listdir('../data_p_beam_3'):
+    for filename in os.listdir('../data_p_beam/2_second'):
         
         # all of the csv file is converted to a list of strings for extracting
         # the time data
-        f = open('../data_p_beam_3/' + filename)
+        f = open('../data_p_beam/2_second/' + filename)
         lines = f.readlines()
         f.close()
         
@@ -696,7 +669,7 @@ def load_p_beam_data_3(start_time):
             arr[i, 0] = measurement_time - start_time
 
         # the current data is loaded into a numpy array
-        arr[:,1] = np.loadtxt('../data_p_beam_3/' + filename, 
+        arr[:,1] = np.loadtxt('../data_p_beam/2_second/' + filename, 
                               delimiter = ',', 
                               skiprows=1, 
                               usecols=(1));
@@ -714,6 +687,74 @@ def load_p_beam_data_3(start_time):
                                 arr, axis = 0)
 
     return p_beam_data
+
+# ###############################################################################
+# ###############################################################################   
+
+# def load_p_beam_data_3(start_time):
+#     """Loads all of the third proton beam data set (p_beam_data_3) into a numpy 
+#         array
+    
+#     Arguments:
+#         start_time {int} -- Unix epoch time stamp of the reference t=0 
+#             measurement for this data. One should access from the 
+#             dictionary returned by get_start_times().
+    
+#     Returns:
+#         p_beam_data (numpy.float64): a (2 x n) array of all of the proton beam 
+#             monitoring data. 
+#                 - row 0: time elapsed in seconds since the first measurement
+#                 - row 1: beam current in uA - monitoring data
+#     """
+    
+#     # instantiate array to hold the resulting data, empty and single column 
+#     # at first, for data to be successively stacked
+#     p_beam_data = np.empty((0,2), float)
+    
+#     # loop through the files and load the data
+#     for filename in os.listdir('../data_p_beam_3'):
+        
+#         # all of the csv file is converted to a list of strings for extracting
+#         # the time data
+#         f = open('../data_p_beam_3/' + filename)
+#         lines = f.readlines()
+#         f.close()
+        
+#         # instantiate an array to hold the measurement times
+#         arr = np.zeros((np.shape(lines)[0] - 1, 2))
+        
+#         # loop over every row in the csv file, skipping line 1
+#         for i in range(0, np.shape(arr)[0]):
+            
+#             # convert the measurement time to epoch time
+#             date_time = lines[i + 1][0:10] + ' ' + lines[i + 1][11:19]
+#             # print(date_time)
+#             pattern = '%Y-%m-%d %H:%M:%S'
+#             measurement_time = int(
+#                 time.mktime(time.strptime(date_time, pattern)))
+            
+#             # save the elapsed time to the times array
+#             arr[i, 0] = measurement_time - start_time
+
+#         # the current data is loaded into a numpy array
+#         arr[:,1] = np.loadtxt('../data_p_beam_3/' + filename, 
+#                               delimiter = ',', 
+#                               skiprows=1, 
+#                               usecols=(1));
+        
+#         # removing the 0 values
+#         for i in range(0,np.shape(arr)[0]):
+
+#             if (arr[i,1] == 0):
+
+#                 arr[i,1] = float('nan')
+
+
+#         # append the time and count data to the array
+#         p_beam_data = np.append(p_beam_data, 
+#                                 arr, axis = 0)
+
+#     return p_beam_data
 
 ###############################################################################
 ###############################################################################

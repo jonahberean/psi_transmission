@@ -1,5 +1,3 @@
 # ignore the data folders
-data_main_detector/
-data_monitor_detector/
-data_p_beam_2s/
-data_p_beam_10s/
+data_ucn/
+data_p_beam/
