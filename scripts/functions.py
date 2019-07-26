@@ -1,10 +1,9 @@
-"""
-!!! complete the docstring
-Our first Python module. This initial string is a module-level documentation string.
-It is not a necessary component of the module. It is a useful way to describe the
-purpose of your module.
-"""
+# -*- coding: utf-8 -*-
+"""Functions for analysis of 2017 PSI transmission experiment
 
+This module contains a variety of functions that are useful for loading
+and analyzing the data set from the 2017 PSI UCN transmission experiment.
+"""
 # Some standard import statements
 
 import sys
@@ -174,8 +173,6 @@ def load_main(config, run_type, norm_dict_in = None):
             # this if/else sequence handles cuts of the data, which for 
             # some runs is specific based on the experimental 
             # conditions
-            # !!! These need to be re-documented somewhere in ipynb
-            # !!! The eLog parsing needs to be summarized as well
             # specific data cut for run 35 on the 8th
             if ((filename[2:3] == '8') and 
                 (filename[10:12] == '35')):
@@ -195,11 +192,6 @@ def load_main(config, run_type, norm_dict_in = None):
                 N = np.sum(count_data[150:2500])
 
             # if it is a shot run we take all the counts
-            # !!! But does this mean that we're counting that initial proton 
-            # irradiation background in here? What is that background from?
-            # should it be chracterized and removed? Does it fluctuate over
-            # time? If so could it be tied to the current measurements and then
-            # corrected out?
             elif (run_type == 'shot'):
             
                 N = np.sum(count_data)
@@ -213,9 +205,6 @@ def load_main(config, run_type, norm_dict_in = None):
 
             # normalize the data depending on the normalize_flag
             if (norm_dict_in != None):
-
-                # !!! the error associated with the normalization 
-                # routine has not been implemented
 
                 # the fits to the nominal configuration data provide
                 # a benchmark for percentage loss of absolute counts
@@ -354,6 +343,76 @@ def load_all_main(norm_dict = None):
                                                 axis = 0)
 
     return data_dict
+
+###############################################################################
+###############################################################################
+
+def load_monitor():
+    """A function to load and sum all UCN count data from monitor detector
+    runs
+    
+    Returns:
+        numpy.float64 -- an n x 4 array of the resulting data The five columns 
+        are:
+            0 - the run start time in seconds since the experimental start
+            1 - the number of UCN counts
+            2 - the Poisson error in UCN counts, \sqrt{N}
+            3 - [day].[run number] of measurement
+    """    
+
+    # get the start time
+    start_time = get_start_time()
+
+    # initialize an array to hold the data
+    monitor_data = np.empty((0,4), float)
+
+     # loop through the files and load the data
+    for filename in os.listdir('../data_ucn/monitor_detector'):
+        
+        # get the time stamp from the txt file and the counts from the tof file
+        # but we only check for one, so that we don't do each twice.
+        if(filename[0] == 'T' and 'tof' in filename):
+            
+            # print(filename[0:12])
+
+            # grab from the text file associated with the run
+            f = open('../data_ucn/monitor_detector/' 
+                            + filename[0:12] 
+                            + '.txt')  
+
+            lines = f.readlines()
+            f.close()
+
+            # grab the epoch time for run start
+            date_time = filename[1:3].zfill(2) + '.12.2017 '\
+                + lines[26][15:23]
+            
+            pattern = '%d.%m.%Y %H:%M:%S'
+            run_time = int(time.mktime(
+                time.strptime(date_time, pattern)))
+
+            # reset the run_start_time with reference to the
+            # t = 0 time
+            run_time = run_time - start_time
+
+            # load the monitor count data
+            arr = np.loadtxt('../data_ucn/monitor_detector/' + filename,
+                                usecols = (1))
+
+            # sum the counts
+            counts = np.sum(arr)
+
+            # saving the [day].[run number] can be useful for debugging
+            day_run_no = int(filename[1:3]) + (0.001
+                                               * int(filename[9:12]))
+
+            # the current data is appended to the existing data array
+            monitor_data = np.append(monitor_data, [[run_time, 
+                                                    counts, 
+                                                    np.sqrt(counts),
+                                                    day_run_no]], axis = 0)
+    
+    return monitor_data
 
 ###############################################################################
 ###############################################################################
