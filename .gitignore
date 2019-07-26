@@ -1,3 +1,8 @@
 # ignore the data folders
 data_ucn/
 data_p_beam/
+
+# ignore the extra stuff
+.eggs/
+.ipynb_checkpoints/
+.vscode/

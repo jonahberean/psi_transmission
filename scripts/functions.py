@@ -19,9 +19,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import math
 
-def hello():
-    print('hello')
-
 ###############################################################################
 ###############################################################################
 
@@ -623,74 +620,6 @@ def load_p_beam_2s():
                                 arr, axis = 0)
 
     return p_beam_data
-
-# ###############################################################################
-# ###############################################################################   
-
-# def load_p_beam_data_3(start_time):
-#     """Loads all of the third proton beam data set (p_beam_data_3) into a numpy 
-#         array
-    
-#     Arguments:
-#         start_time {int} -- Unix epoch time stamp of the reference t=0 
-#             measurement for this data. One should access from the 
-#             dictionary returned by get_start_times().
-    
-#     Returns:
-#         p_beam_data (numpy.float64): a (2 x n) array of all of the proton beam 
-#             monitoring data. 
-#                 - row 0: time elapsed in seconds since the first measurement
-#                 - row 1: beam current in uA - monitoring data
-#     """
-    
-#     # instantiate array to hold the resulting data, empty and single column 
-#     # at first, for data to be successively stacked
-#     p_beam_data = np.empty((0,2), float)
-    
-#     # loop through the files and load the data
-#     for filename in os.listdir('../data_p_beam_3'):
-        
-#         # all of the csv file is converted to a list of strings for extracting
-#         # the time data
-#         f = open('../data_p_beam_3/' + filename)
-#         lines = f.readlines()
-#         f.close()
-        
-#         # instantiate an array to hold the measurement times
-#         arr = np.zeros((np.shape(lines)[0] - 1, 2))
-        
-#         # loop over every row in the csv file, skipping line 1
-#         for i in range(0, np.shape(arr)[0]):
-            
-#             # convert the measurement time to epoch time
-#             date_time = lines[i + 1][0:10] + ' ' + lines[i + 1][11:19]
-#             # print(date_time)
-#             pattern = '%Y-%m-%d %H:%M:%S'
-#             measurement_time = int(
-#                 time.mktime(time.strptime(date_time, pattern)))
-            
-#             # save the elapsed time to the times array
-#             arr[i, 0] = measurement_time - start_time
-
-#         # the current data is loaded into a numpy array
-#         arr[:,1] = np.loadtxt('../data_p_beam_3/' + filename, 
-#                               delimiter = ',', 
-#                               skiprows=1, 
-#                               usecols=(1));
-        
-#         # removing the 0 values
-#         for i in range(0,np.shape(arr)[0]):
-
-#             if (arr[i,1] == 0):
-
-#                 arr[i,1] = float('nan')
-
-
-#         # append the time and count data to the array
-#         p_beam_data = np.append(p_beam_data, 
-#                                 arr, axis = 0)
-
-#     return p_beam_data
 
 ###############################################################################
 ###############################################################################
