@@ -25,3 +25,7 @@ Storage lifetime is computed for every configuration, and found to have generall
 ## transmission
 
 Transmission measurements are produced for each configuration.
+
+## workspace
+
+Nothing in here is directly relevant to the analysis. Mainly experimentation with various tools.
