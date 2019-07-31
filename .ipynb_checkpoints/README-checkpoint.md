@@ -30,9 +30,7 @@ Some relevant articles, and reports are provided.
 A git submodule linking to the repository containing a report on the analysis performed. 
 
 ## to-do
-
-- re-walk through all of the error analysis
-- better error presentation of the sD2 normalization slopes ('bands? - RP')
+- report writing
 
 ## to-do blocked
 - begin simulations, put relevant files in this repo or direct reader to SW model, STL, sim data, etc.

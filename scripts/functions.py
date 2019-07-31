@@ -397,7 +397,8 @@ def load_monitor():
 
             # reset the run_start_time with reference to the
             # t = 0 time
-            run_time = run_time - start_time
+            # !!! temporarily use the raw UNIX epoch time stamp
+            # run_time = run_time - start_time
 
             # load the monitor count data
             arr = np.loadtxt('../data_ucn/monitor_detector/' + filename,
