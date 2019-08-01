@@ -1,6 +1,6 @@
 # psi_transmission
 
-This repository contains scripts, Jupyter notebooks, and other documents used for analysis of the UCN guide transmission experiment, carried out in December of 2017 at the [Paul Scherrer Institute](https://www.psi.ch/en). This file provides an overview of the repository contents.
+This repository contains scripts, Jupyter notebooks, and other documents used for analysis of the UCN guide transmission experiment, carried out in December of 2017 at the [Paul Scherrer Institute](https://www.psi.ch/en). This file provides an overview of its contents.
 
 ## data 
 
