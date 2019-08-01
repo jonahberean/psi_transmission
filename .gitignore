@@ -6,3 +6,6 @@ data_p_beam/
 .eggs/
 .ipynb_checkpoints/
 .vscode/
+
+# ignore my folder of images
+img/

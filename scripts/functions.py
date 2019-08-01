@@ -144,7 +144,8 @@ def load_main(config, run_type):
 
             # reset the run_start_time with reference to the
             # t = 0 time
-            run_time = run_time - start_time
+            # !!! temporarily removing this zero-ing
+            # run_time = run_time - start_time
 
             # grab the storage time
             if (run_type == 'shot'):
