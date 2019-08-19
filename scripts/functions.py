@@ -12,6 +12,7 @@ import logging
 import time
 import decimal
 import uncertainties
+from lmfit import Model
 from uncertainties import unumpy
 from uncertainties import *
 import numpy as np
@@ -50,6 +51,9 @@ def storage_lt_fit(t, N_0, tau):
     Returns:
         float -- counts as a function of time; N(t)
     """   
+    # print('N_0 = {}'.format(N_0))
+    # print('t = {}'.format(t))
+    # print('tau = {}'.format(tau))
     return N_0 * np.exp(-t / tau)
 
 ###############################################################################
@@ -81,7 +85,7 @@ def get_start_time():
 ###############################################################################
 ###############################################################################
 
-def load_main(config, run_type):
+def load_main(config, run_type, raw_unix_time_flag = False):
     """A function to load data and sum counts for runs of a given
         configuration and pre-storage time
     
@@ -101,6 +105,10 @@ def load_main(config, run_type):
                 's005' - 5 second storage
                 's020' - 20 second storage
                 's100' - 100 second storage
+        raw_unix_time_flag {boolean, optional} -- flag to give the option of 
+            not correcting the time of each run based on the time of the
+            experimental campaign. Can be useful for datetime plotting.
+            Defaults to False.
     
     Returns:
         numpy.float64 -- An n x 5 data array of the results from loading the
@@ -140,12 +148,21 @@ def load_main(config, run_type):
                         lines[26][15:23]
 
             pattern = '%d.%m.%Y %H:%M:%S'
-            run_time = int(time.mktime(time.strptime(date_time, pattern)))
+            unix_run_time = int(time.mktime(time.strptime(date_time, pattern)))
 
-            # reset the run_start_time with reference to the
-            # t = 0 time
-            # !!! temporarily removing this zero-ing
-            # run_time = run_time - start_time
+            # for most applications, we want the time associated with each run
+            # to be the time elapsed, in seconds, since the experimental 
+            # campaign began. However, sometimes it is nice to generate plots
+            # with the x-axis in real date-time, not in seconds elapsed. For
+            # these purposes, this flag will be used, and run_time will not 
+            # be adjusted by start_time
+            if (raw_unix_time_flag):
+
+                run_time = unix_run_time
+            
+            else:
+
+                run_time = unix_run_time - start_time
 
             # grab the storage time
             if (run_type == 'shot'):
@@ -233,12 +250,16 @@ def spectrum_cuts(filename, count_data, run_type):
 ###############################################################################
 ###############################################################################
 
-def load_all_main(norm_flag = True):
+def load_all_main(norm_flag = True, raw_unix_time_flag = False):
     """A function to load data and sum counts for all the run data available
     
     Arguments:
         norm_flag {boolean, optional} -- flag to turn on normalization based
         on sD2 losses. Defaults to True.
+        raw_unix_time_flag {boolean, optional} -- flag to give the option of 
+            not correcting the time of each run based on the time of the
+            experimental campaign. Can be useful for datetime plotting.
+            Defaults to False.
     
     Returns:
         dict -- a dictionary of arrays of the same structure as is returned by
@@ -270,6 +291,8 @@ def load_all_main(norm_flag = True):
         key 1: parameter {string} -- The options are:
             'N_0'     - counts at time 0 +/- error 
             'y'       - loss rate +/- error
+            'redchi'  - reduced chi square of fit
+            'nfree'   - degrees of freedom
     """
     # instantiate configuration and run type lists
     config_list = ['JPTI', 'JPSU', 'DISK', 'GD01', 'GD03', 'EPSU']
@@ -289,19 +312,44 @@ def load_all_main(norm_flag = True):
 
             # load the main detector data for the TRIUMF-style normalization
             # configuration
-            arr = load_main('NOMI', run_type)
+            arr = load_main('NOMI', run_type, raw_unix_time_flag)
 
+            ### Using lmfit to perfom fit of source norm data
+            t = arr[:, 0]
+            counts = arr[:, 2]
+            gmodel = Model(linear_fit)
+            params = gmodel.make_params(N_0=10000, y=0.24)
+            result = gmodel.fit(counts, 
+                                params, 
+                                t=t, 
+                                weights = 1/np.sqrt(arr[:,2]))
+
+            norm_dict[run_type, 'N_0'] = ufloat(result.params['N_0'].value, 
+                                                result.params['N_0'].stderr)
+            norm_dict[run_type, 'y']   = ufloat(result.params['y'].value, 
+                                                result.params['y'].stderr)
+            norm_dict[run_type, 'redchi'] = result.redchi
+            norm_dict[run_type, 'nfree']  = result.nfree
+
+            # optional plots and fit report, useful for debugging
+            # print(result.fit_report())
+            # plt.plot(t, y, 'bo')
+            # plt.plot(t, result.init_fit, 'k--')
+            # plt.plot(t, result.best_fit, 'r-')
+            # plt.show()
+
+            ### Used to use curve_fit for this
             # get the normaliization fit parameters
-            popt, pcov = curve_fit(linear_fit, arr[:,0], arr[:,2], 
-                                sigma = arr[:,3], absolute_sigma = True)
+            # popt, pcov = curve_fit(linear_fit, arr[:,0], arr[:,2], 
+            #                     sigma = arr[:,3], absolute_sigma = True)
             
             # saving the fit results to the dictionary, as uncertainty objects
-            norm_dict[run_type, 'N_0'] = ufloat(popt[0], 
-                                                np.sqrt(np.diag(pcov))[0])
-            norm_dict[run_type, 'y']   = ufloat(popt[1], 
-                                                np.sqrt(np.diag(pcov))[1])
+            # norm_dict[run_type, 'N_0'] = ufloat(popt[0], 
+            #                                     np.sqrt(np.diag(pcov))[0])
+            # norm_dict[run_type, 'y']   = ufloat(popt[1], 
+            #                                     np.sqrt(np.diag(pcov))[1])
 
-            # normalize the very data used to calculate the normalization and
+            # normalize the very data used to calculate the normalization
             arr = sD2_normalize(arr, norm_dict, run_type)
 
             data_dict['NOMI', run_type] = arr
@@ -326,7 +374,7 @@ def load_all_main(norm_flag = True):
         for run_type in run_type_list:
 
             # load the appropriate data into an array
-            arr = load_main(config, run_type)
+            arr = load_main(config, run_type, raw_unix_time_flag)
 
             # perform the normalization for sD2 losses
             if (norm_flag == True): 
