@@ -9,3 +9,6 @@ data_p_beam/
 
 # ignore my folder of images
 img/
+
+# sim directory
+sim/
