@@ -70,14 +70,22 @@ def get_start_time():
     """
     
     # read the 8th of December data as a list of strings
-    f = open('../data_p_beam/2_second/20171208.csv')
+#     f = open('../data_p_beam/2_second/20171208.csv')
+#     lines = f.readlines()
+#     f.close()
+    
+    # !!! temporarily changing this to a run closer to the start of where
+    # proper data was first collected
+    filename = 'T081217_0022_NOMI_s020.txt'
+    f = open('../data_ucn/main_detector_sorted/' + filename)
     lines = f.readlines()
     f.close()
     
-    # convert the measurement time to epoch time
-    date_time = lines[1][0:10] + ' ' + lines[1][11:19]
-    # print(date_time)
-    pattern = '%Y-%m-%d %H:%M:%S'
+    date_time = filename[1:3].zfill(2) + \
+                        '.12.2017 ' + \
+                        lines[26][15:23]
+
+    pattern = '%d.%m.%Y %H:%M:%S'
     start_time = int(time.mktime(time.strptime(date_time, pattern)))
     
     return start_time
@@ -466,7 +474,7 @@ def load_monitor():
                                                     np.sqrt(counts),
                                                     day_run_no]], axis = 0)
     
-    return monitor_data
+    return monitor_data[monitor_data[:,0].argsort()]
 
 ###############################################################################
 ###############################################################################

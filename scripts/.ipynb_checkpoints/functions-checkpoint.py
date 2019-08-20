@@ -11,6 +11,10 @@ import os
 import logging
 import time
 import decimal
+import uncertainties
+from lmfit import Model
+from uncertainties import unumpy
+from uncertainties import *
 import numpy as np
 from scipy.optimize import curve_fit
 from IPython import get_ipython
@@ -47,6 +51,9 @@ def storage_lt_fit(t, N_0, tau):
     Returns:
         float -- counts as a function of time; N(t)
     """   
+    # print('N_0 = {}'.format(N_0))
+    # print('t = {}'.format(t))
+    # print('tau = {}'.format(tau))
     return N_0 * np.exp(-t / tau)
 
 ###############################################################################
@@ -63,14 +70,22 @@ def get_start_time():
     """
     
     # read the 8th of December data as a list of strings
-    f = open('../data_p_beam/2_second/20171208.csv')
+#     f = open('../data_p_beam/2_second/20171208.csv')
+#     lines = f.readlines()
+#     f.close()
+    
+    # !!! temporarily changing this to a run closer to the start of where
+    # proper data was first collected
+    filename = 'T081217_0022_NOMI_s020.txt'
+    f = open('../data_ucn/main_detector_sorted/' + filename)
     lines = f.readlines()
     f.close()
     
-    # convert the measurement time to epoch time
-    date_time = lines[1][0:10] + ' ' + lines[1][11:19]
-    # print(date_time)
-    pattern = '%Y-%m-%d %H:%M:%S'
+    date_time = filename[1:3].zfill(2) + \
+                        '.12.2017 ' + \
+                        lines[26][15:23]
+
+    pattern = '%d.%m.%Y %H:%M:%S'
     start_time = int(time.mktime(time.strptime(date_time, pattern)))
     
     return start_time
@@ -78,7 +93,7 @@ def get_start_time():
 ###############################################################################
 ###############################################################################
 
-def load_main(config, run_type, norm_dict_in = None):
+def load_main(config, run_type, raw_unix_time_flag = False):
     """A function to load data and sum counts for runs of a given
         configuration and pre-storage time
     
@@ -98,19 +113,10 @@ def load_main(config, run_type, norm_dict_in = None):
                 's005' - 5 second storage
                 's020' - 20 second storage
                 's100' - 100 second storage
-        norm_dict_in {dict} -- dictionary of values of the results from the
-            ucn yield analysis. Defaults to None which avoids normalization.
-            The key pairs to be used are:
-                key 0: run_type {string} -- The options are:
-                'shot' - direct shot measurements 
-                's005' - 5 second storage
-                's020' - 20 second storage
-                's100' - 100 second storage
-                key 1: parameter {string} -- The options are:
-                'N_0'     - counts at time 0
-                'y'       - loss rate
-                'N_0_err' - associated error
-                'y_err'   - associated error
+        raw_unix_time_flag {boolean, optional} -- flag to give the option of 
+            not correcting the time of each run based on the time of the
+            experimental campaign. Can be useful for datetime plotting.
+            Defaults to False.
     
     Returns:
         numpy.float64 -- An n x 5 data array of the results from loading the
@@ -125,10 +131,6 @@ def load_main(config, run_type, norm_dict_in = None):
     # start_time is hard-coded here as the UNIX time stamp of the first 
     # proton beam current measurement, of the 2 second data. 
     start_time = get_start_time()
-
-    if norm_dict_in != None:
-        
-        norm_dict = dict(norm_dict_in)
 
     # instantiate a new numpy array 
     all_data = np.empty((0,5), float)
@@ -149,20 +151,34 @@ def load_main(config, run_type, norm_dict_in = None):
             f.close()
 
             # grab the epoch time for run start
-            date_time = filename[1:3].zfill(2) + '.12.2017 '\
-                + lines[26][15:23]
-            pattern = '%d.%m.%Y %H:%M:%S'
-            run_time = int(time.mktime(
-                time.strptime(date_time, pattern)))
+            date_time = filename[1:3].zfill(2) + \
+                        '.12.2017 ' + \
+                        lines[26][15:23]
 
-            # reset the run_start_time with reference to the
-            # t = 0 time
-            run_time = run_time - start_time
+            pattern = '%d.%m.%Y %H:%M:%S'
+            unix_run_time = int(time.mktime(time.strptime(date_time, pattern)))
+
+            # for most applications, we want the time associated with each run
+            # to be the time elapsed, in seconds, since the experimental 
+            # campaign began. However, sometimes it is nice to generate plots
+            # with the x-axis in real date-time, not in seconds elapsed. For
+            # these purposes, this flag will be used, and run_time will not 
+            # be adjusted by start_time
+            if (raw_unix_time_flag):
+
+                run_time = unix_run_time
+            
+            else:
+
+                run_time = unix_run_time - start_time
 
             # grab the storage time
             if (run_type == 'shot'):
+
                 storage_time = 0
+
             else:    
+
                 storage_time = int(run_type[1:4])
 
             # The data is retrieved from the .tof file
@@ -170,80 +186,8 @@ def load_main(config, run_type, norm_dict_in = None):
                                     filename[0:22] + '.tof',
                                     usecols = (1))
 
-            # this if/else sequence handles cuts of the data, which for 
-            # some runs is specific based on the experimental 
-            # conditions
-            # specific data cut for run 35 on the 8th
-            if ((filename[2:3] == '8') and 
-                (filename[10:12] == '35')):
-
-                N = np.sum(count_data[150:1000])
-
-            # specific data cut for run 66 on the 8th
-            elif ((filename[2:3] == '8') and 
-                  (filename[10:12] == '66')):
-
-                N = np.sum(count_data[150:1500])
-
-            # specific data cut for run 88 on the 8th
-            elif ((filename[2:3] == '8') and 
-                  (filename[10:12] == '88')):
-
-                N = np.sum(count_data[150:2500])
-
-            # if it is a shot run we take all the counts
-            elif (run_type == 'shot'):
-            
-                N = np.sum(count_data)
-            
-            # otherwise cut the data normally for a pre-storage run
-            # this cuts out the initial background appearing from
-            # irradiation
-            else:
-
-                N = np.sum(count_data[150:-1])
-
-            # normalize the data depending on the normalize_flag
-            if (norm_dict_in != None):
-
-                # the fits to the nominal configuration data provide
-                # a benchmark for percentage loss of absolute counts
-                # depending on the time having elapsed since the start
-                # of the experiment. 
-
-                denom = linear_fit(run_time, norm_dict[run_type, 'N_0'], 
-                                           norm_dict[run_type, 'y'])
-
-                S = norm_dict[run_type, 'N_0'] / denom
-
-                # normalize the counts
-                N = N * S
-
-                # compute the uncertainty in the denominator for S, i.e. the 
-                # N(t) calculation from the nominal configuration data fit
-                N_0_err = norm_dict[run_type, 'N_0_err']
-                y_err = norm_dict[run_type, 'y_err']
-                denom_err = np.sqrt((N_0_err)**2 + (y_err)**2)
-
-                # calculate the fractional uncertainty in the numerator for S
-                N_0_frac_err = N_0_err / norm_dict[run_type, 'N_0']
-
-                # calculate the fractional uncertainty in S
-                S_frac_err = np.sqrt((N_0_frac_err)**2 +
-                                     (denom_err / denom)**2)
-
-                # calculate the resulting fractional uncertainty in counts
-
-                N_frac_err = np.sqrt((np.sqrt(N) / N)**2 + 
-                                                            (S_frac_err)**2)
-
-                # the absolute unceratainty 
-                N_err = N_frac_err * N
-
-            # if no normalization, then N_err is just sqrt(N) of Poisson
-            else:
-
-                N_err = np.sqrt(N)
+            # various cuts to the time-of-flight spectra are made
+            N = spectrum_cuts(filename, count_data, run_type)
 
             # saving the [day].[run number] can be useful for debugging
             day_run_no = int(filename[1:3]) + (0.001
@@ -254,7 +198,7 @@ def load_main(config, run_type, norm_dict_in = None):
                                 [[run_time,
                                    storage_time,
                                    N,
-                                   N_err,
+                                   np.sqrt(N),
                                    day_run_no]],
                                 axis=0)
 
@@ -264,50 +208,163 @@ def load_main(config, run_type, norm_dict_in = None):
 ###############################################################################
 ###############################################################################
 
-def load_all_main(norm_dict = None):
+def spectrum_cuts(filename, count_data, run_type):
+    """makes specific cuts to the time-of-flight spectrum based on known issues
+    in the data
+    
+    Arguments:
+        filename {string} -- name of the file being loaded
+        count_data {numpy.float64} -- summed counts
+    
+    Returns:
+        numpy.float64 -- summed counts after the cut
+    """
+
+    # this if/else sequence handles cuts of the data, which for 
+    # some runs is specific based on the experimental 
+    # conditions
+    # specific data cut for run 35 on the 8th
+    if ((filename[2:3] == '8') and 
+        (filename[10:12] == '35')):
+
+        N = np.sum(count_data[150:1000])
+
+    # specific data cut for run 66 on the 8th
+    elif ((filename[2:3] == '8') and 
+            (filename[10:12] == '66')):
+
+        N = np.sum(count_data[150:1500])
+
+    # specific data cut for run 88 on the 8th
+    elif ((filename[2:3] == '8') and 
+            (filename[10:12] == '88')):
+
+        N = np.sum(count_data[150:2500])
+
+    # if it is a shot run we take all the counts
+    elif (run_type == 'shot'):
+    
+        N = np.sum(count_data)
+    
+    # otherwise cut the data normally for a pre-storage run
+    # this cuts out the initial background appearing from
+    # irradiation
+    else:
+
+        N = np.sum(count_data[150:-1])
+
+    return N
+
+###############################################################################
+###############################################################################
+
+def load_all_main(norm_flag = True, raw_unix_time_flag = False):
     """A function to load data and sum counts for all the run data available
     
     Arguments:
-        norm_dict {dict} -- dictionary of values of the results from the
-            ucn yield analysis. Defaults to None which avoids normalization.
-            The key pairs to be used are:
-                key 0: run_type {string} -- The options are:
-                'shot' - direct shot measurements 
-                's005' - 5 second storage
-                's020' - 20 second storage
-                's100' - 100 second storage
-                key 1: parameter {string} -- The options are:
-                'N_0'     - counts at time 0
-                'y'       - loss rate
-                'N_0_err' - associated error
-                'y_err'   - associated error
+        norm_flag {boolean, optional} -- flag to turn on normalization based
+        on sD2 losses. Defaults to True.
+        raw_unix_time_flag {boolean, optional} -- flag to give the option of 
+            not correcting the time of each run based on the time of the
+            experimental campaign. Can be useful for datetime plotting.
+            Defaults to False.
     
     Returns:
         dict -- a dictionary of arrays of the same structure as is returned by
-            load_data(). The key pairs to be used are:
-                key 0: config {string} -- The options are:
-                'NOMI' - nominal, guide-less
-                'JPTI' - JP Ti guide with NiP
-                'JPSU' - JP SUS guide with NiP
-                'DISK' - SS Disk
-                'GD01' - UGD01 guide
-                'GD03' - UGD03 guide
-                'EPSU' - EP SUS guide with NiP
-                'all'  - all of the above
-                key 1: run_type {string} -- The options are:
-                'shot' - direct shot measurements 
-                's005' - 5 second storage
-                's020' - 20 second storage
-                's100' - 100 second storage
-                'all'  - all of the above
+        load_data(). The key pairs to be used are:
+        key 0: config {string} -- The options are:
+            'NOMI' - nominal, guide-less
+            'JPTI' - JP Ti guide with NiP
+            'JPSU' - JP SUS guide with NiP
+            'DISK' - SS Disk
+            'GD01' - UGD01 guide
+            'GD03' - UGD03 guide
+            'EPSU' - EP SUS guide with NiP
+            'all'  - all of the above
+        key 1: run_type {string} -- The options are:
+            'shot' - direct shot measurements 
+            's005' - 5 second storage
+            's020' - 20 second storage
+            's100' - 100 second storage
+            'all'  - all of the above
+
+        dict -- dictionary of values (unumpy ufloat object) 
+        of the results from the sD2 losses normalization. The key pairs to be 
+        used are:
+        key 0: run_type {string} -- The options are:
+            'shot' - direct shot measurements 
+            's005' - 5 second storage
+            's020' - 20 second storage
+            's100' - 100 second storage
+        key 1: parameter {string} -- The options are:
+            'N_0'     - counts at time 0 +/- error 
+            'y'       - loss rate +/- error
+            'redchi'  - reduced chi square of fit
+            'nfree'   - degrees of freedom
     """
-    
     # instantiate configuration and run type lists
-    config_list = ['NOMI', 'JPTI', 'JPSU', 'DISK', 'GD01', 'GD03', 'EPSU']
+    config_list = ['JPTI', 'JPSU', 'DISK', 'GD01', 'GD03', 'EPSU']
     run_type_list = ['shot', 's005', 's020', 's100']
 
-    # instantiate the dict
+    # instantiate dictionary to hold all main detector data
     data_dict = {}
+
+    # load data for normalization
+    if (norm_flag == True):
+
+        # initialize dictionary to hold parameter results
+        norm_dict = {}
+        
+        # iterate over each run type
+        for run_type in run_type_list:
+
+            # load the main detector data for the TRIUMF-style normalization
+            # configuration
+            arr = load_main('NOMI', run_type, raw_unix_time_flag)
+
+            ### Using lmfit to perfom fit of source norm data
+            t = arr[:, 0]
+            counts = arr[:, 2]
+            gmodel = Model(linear_fit)
+            params = gmodel.make_params(N_0=10000, y=0.24)
+            result = gmodel.fit(counts, 
+                                params, 
+                                t=t, 
+                                weights = 1/np.sqrt(arr[:,2]))
+
+            norm_dict[run_type, 'N_0'] = ufloat(result.params['N_0'].value, 
+                                                result.params['N_0'].stderr)
+            norm_dict[run_type, 'y']   = ufloat(result.params['y'].value, 
+                                                result.params['y'].stderr)
+            norm_dict[run_type, 'redchi'] = result.redchi
+            norm_dict[run_type, 'nfree']  = result.nfree
+
+            # optional plots and fit report, useful for debugging
+            # print(result.fit_report())
+            # plt.plot(t, y, 'bo')
+            # plt.plot(t, result.init_fit, 'k--')
+            # plt.plot(t, result.best_fit, 'r-')
+            # plt.show()
+
+            ### Used to use curve_fit for this
+            # get the normaliization fit parameters
+            # popt, pcov = curve_fit(linear_fit, arr[:,0], arr[:,2], 
+            #                     sigma = arr[:,3], absolute_sigma = True)
+            
+            # saving the fit results to the dictionary, as uncertainty objects
+            # norm_dict[run_type, 'N_0'] = ufloat(popt[0], 
+            #                                     np.sqrt(np.diag(pcov))[0])
+            # norm_dict[run_type, 'y']   = ufloat(popt[1], 
+            #                                     np.sqrt(np.diag(pcov))[1])
+
+            # normalize the very data used to calculate the normalization
+            arr = sD2_normalize(arr, norm_dict, run_type)
+
+            data_dict['NOMI', run_type] = arr
+
+    else:
+
+        norm_dict = None
 
     # the 'all', run_type dicts and the 'all', 'all' dict must be instantiated
     # prior to the main for loops
@@ -319,14 +376,18 @@ def load_all_main(norm_dict = None):
 
     for config in config_list:
 
-        # at the start of each config, initialize the empty 'config', 'all'
-        #   array
-
+        # at start of each config, initialize the empty 'config', 'all' array
         data_dict[config, 'all'] = np.empty((0,5), float)
 
         for run_type in run_type_list:
 
-            arr = load_main(config, run_type, norm_dict)
+            # load the appropriate data into an array
+            arr = load_main(config, run_type, raw_unix_time_flag)
+
+            # perform the normalization for sD2 losses
+            if (norm_flag == True): 
+
+                arr = sD2_normalize(arr, norm_dict, run_type)
 
             data_dict[config, run_type] = arr
 
@@ -342,7 +403,7 @@ def load_all_main(norm_dict = None):
                                                 arr,
                                                 axis = 0)
 
-    return data_dict
+    return data_dict, norm_dict
 
 ###############################################################################
 ###############################################################################
@@ -352,148 +413,68 @@ def load_monitor():
     runs
     
     Returns:
-        numpy.float64 -- an n x 3 array of the resulting data The five columns 
+        numpy.float64 -- an n x 4 array of the resulting data The five columns 
         are:
-                0 - the run start time in seconds since the experimental start
-                1 - the storage time (0 if direct shot)
-                2 - the number of UCN counts
-                3 - sqrt(N) error in number of UCN counts
-                4 - [day].[run number] of measurement
+            0 - the run start time in seconds since the experimental start
+            1 - the number of UCN counts
+            2 - the Poisson error in UCN counts, \sqrt{N}
+            3 - [day].[run number] of measurement
     """    
-    monitor_data = np.empty((0,3), float)
-    
-    return monitor_data
 
-###############################################################################
-###############################################################################
+    # get the start time
+    start_time = get_start_time()
 
-def ucn_yield(data_dict, plotting_flag = False):
-    """Analyzes the ucn yield over time.
-    
-    Arguments:
-        data_dict {dict} -- A dictionary of n x 5 data array of the results from 
-            loading the run data. The number of rows corresponds to the number 
-            of runs loaded. The five columns are:
-                0 - the run start time in seconds since the experimental start
-                1 - the storage time (0 if direct shot)
-                2 - the number of UCN counts
-                3 - sqrt(N) error in number of UCN counts
-                4 - [day].[run number] of measurement
-            The key pairs to be used are:
-                key 0: config {string} -- The options are:
-                'NOMI' - nominal, guide-less
-                'JPTI' - JP Ti guide with NiP
-                'JPSU' - JP SUS guide with NiP
-                'DISK' - SS Disk
-                'GD01' - UGD01 guide
-                'GD03' - UGD03 guide
-                'EPSU' - EP SUS guide with NiP
-                'all'  - all of the above
-                key 1: run_type {string} -- The options are:
-                'shot' - direct shot measurements 
-                's005' - 5 second storage
-                's020' - 20 second storage
-                's100' - 100 second storage
-                'all'  - all of the above
-        plotting_flag {boolean, optional} -- Flag to turn plotting on. 
-            Defaults to False.
-    
-    Returns:
-        norm_dict {dict} -- dictionary of values of the results from the
-            ucn yield analysis. Defaults to None which avoids normalization.
-            The key pairs to be used are:
-                key 0: run_type {string} -- The options are:
-                'shot' - direct shot measurements 
-                's005' - 5 second storage
-                's020' - 20 second storage
-                's100' - 100 second storage
-                key 1: parameter {string} -- The options are:
-                'N_0'     - counts at time 0
-                'y'       - loss rate
-                'N_0_err' - associated error
-                'y_err'   - associated error
-    """
-    run_type_list = ['shot', 's005', 's020', 's100']
+    # initialize an array to hold the data
+    monitor_data = np.empty((0,4), float)
 
-    if (plotting_flag):
-
-        # for an all-in-one figure
-        fig_all, ax_all = plt.subplots()
-            
-        # for counting loop iterations
-        text_y_coord = -0.2
-
-        # for colour consistency in plotting
-        ax_c = plt.gca()
-
-    # initializing the dictionary to hold the results
-    norm_dict = {}
-
-    for run_type in run_type_list:
-
-        # defining a separate variable for more readable plotting code
-        arr = data_dict.copy()['NOMI', run_type]
-
-        # performing a linear fit
-        popt, pcov = curve_fit(linear_fit, arr[:,0], arr[:,2], 
-                            sigma = arr[:,3], absolute_sigma = True)
+     # loop through the files and load the data
+    for filename in os.listdir('../data_ucn/monitor_detector'):
         
-        # saving the fit results to the dictionary
-        norm_dict[run_type, 'N_0']     = popt[0]
-        norm_dict[run_type, 'y']       = popt[1]
-        norm_dict[run_type, 'N_0_err'] = np.sqrt(np.diag(pcov))[0]
-        norm_dict[run_type, 'y_err']   = np.sqrt(np.diag(pcov))[1]
-
-        if (plotting_flag):
-
-            # for colour consistency in plotting
-            color = next(ax_c._get_lines.prop_cycler)['color']
+        # get the time stamp from the txt file and the counts from the tof file
+        # but we only check for one, so that we don't do each twice.
+        if(filename[0] == 'T' and 'tof' in filename):
             
-            # for separate figures
-            fig, ax = plt.subplots()
+            # print(filename[0:12])
+
+            # grab from the text file associated with the run
+            f = open('../data_ucn/monitor_detector/' 
+                            + filename[0:12] 
+                            + '.txt')  
+
+            lines = f.readlines()
+            f.close()
+
+            # grab the epoch time for run start
+            date_time = filename[1:3].zfill(2) + '.12.2017 '\
+                + lines[26][15:23]
             
-            # plotting the data by pre-storage time; separate figures
-            ax.errorbar(arr[:,0], arr[:,2], yerr = arr[:,3], fmt = '.',
-                        label = run_type, color = color)
-            
-            # plotting the data by pre-storage time; all on one figure
-            ax_all.errorbar(arr[:,0], arr[:,2], yerr = arr[:,3], fmt = '.',
-                        label = run_type, color = color)
+            pattern = '%d.%m.%Y %H:%M:%S'
+            run_time = int(time.mktime(
+                time.strptime(date_time, pattern)))
 
+            # reset the run_start_time with reference to the
+            # t = 0 time
+            # !!! temporarily use the raw UNIX epoch time stamp
+            # run_time = run_time - start_time
 
-            ax.plot(arr[:,0], linear_fit(arr[:,0], *popt), color = color);
-            ax_all.plot(arr[:,0], linear_fit(arr[:,0], *popt), color = color);
-            
-            # presentation stuff
-            # ax.set_yscale('log')
-            ax.set_xlabel('Time Elapsed [s]');
-            ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-            ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-            ax.set_ylabel('UCN Counts');
-            ax.legend();
-            ax.set_title('Nominal Configuration - Main Detector');
+            # load the monitor count data
+            arr = np.loadtxt('../data_ucn/monitor_detector/' + filename,
+                                usecols = (1))
 
-        #     printing the fit results below the figure
-        #     text_y_coord = text_y_coord - 0.1
-            ax.text(0, text_y_coord, run_type 
-                    + r': $N_0 = $%.2e $\pm $ %.2e$, \quad \gamma_{sD_2} = $%.2e $ \pm $ %.2e' % (
-                        decimal.Decimal(norm_dict[run_type, 'N_0']), 
-                        decimal.Decimal(norm_dict[run_type, 'y']),
-                        decimal.Decimal(norm_dict[run_type, 'N_0_err']), 
-                        decimal.Decimal(norm_dict[run_type, 'y_err'])),
-                    transform=ax.transAxes);
+            # sum the counts
+            counts = np.sum(arr)
 
-    if (plotting_flag):
-        # presentation stuff
-        ax_all.set_yscale('log')
-        ax_all.set_xlabel('Time Elapsed [s]');
-        ax_all.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-        ax_all.set_ylabel('UCN Counts');
-        ax_all.legend();
-        ax_all.set_title('Nominal Configuration - Main Detector');
+            # saving the [day].[run number] can be useful for debugging
+            day_run_no = int(filename[1:3]) + (0.001
+                                               * int(filename[9:12]))
 
+            # the current data is appended to the existing data array
+            monitor_data = np.append(monitor_data, [[run_time, 
+                                                    counts, 
+                                                    np.sqrt(counts),
+                                                    day_run_no]], axis = 0)
     
-    return norm_dict
+    return monitor_data[monitor_data[:,0].argsort()]
 
 ###############################################################################
 ###############################################################################
@@ -770,3 +751,38 @@ def find_coincidences(p_beam_data, main_data_dict, window, plotting_flag = False
 
 ###############################################################################
 ###############################################################################
+
+def sD2_normalize(arr, norm_dict, run_type):
+    """normalizes the given array with the norm_dict values provided
+    
+    Arguments:
+        arr {numpy.float64} -- see load_main_all for structure
+        norm_dict {dict} -- see load_main_all for key-value details
+        run_type {string} -- see load_main_all for options
+    
+    Returns:
+        numpy.float64 -- the normalized array with same structure
+    """
+
+    # generate uncertainty array of the run data
+    uarr = unumpy.umatrix(arr[:,2], arr[:,3])
+
+    # generate uncertainty float object run time, which has no uncertainty
+    run_time = unumpy.umatrix(arr[:,0], 0)
+
+    # interpolate along the normalization fit for each run start time
+    uinterp = linear_fit(run_time, 
+                    norm_dict[run_type, 'N_0'], 
+                    norm_dict[run_type, 'y'])
+
+    # get the normalization factor required for each point
+    unorm = norm_dict[run_type, 'N_0'] / uinterp
+
+    # normalize the run data
+    uarr = np.multiply(uarr, unorm)
+
+    # update the array values, and hence the dictionary by mutablity in python
+    arr[:,2] = unumpy.nominal_values(uarr)
+    arr[:,3] = unumpy.std_devs(uarr)
+
+    return arr
