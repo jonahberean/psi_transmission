@@ -26,6 +26,10 @@ Storage lifetime is computed for every configuration, and found to have generall
 
 Transmission measurements are produced for each configuration.
 
+## time_constant
+
+Necessary for the simulations, the time constant of the decay following the mauin detection peak is analyzed, across various configurations and pre-storage times.
+
 ## workspace
 
 Nothing in here is directly relevant to the analysis. Mainly experimentation with various tools.

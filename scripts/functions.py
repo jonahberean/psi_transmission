@@ -93,6 +93,39 @@ def get_start_time():
 ###############################################################################
 ###############################################################################
 
+
+def get_monitor_start_time():
+    """Retrieves the UNIX epoch time stamp of the first monitor detector
+    measurement. This is used as a reference time for the analysis
+    
+    Returns:
+        int: the UNIX epoch time stamp
+    """
+    
+    # read the 8th of December data as a list of strings
+#     f = open('../data_p_beam/2_second/20171208.csv')
+#     lines = f.readlines()
+#     f.close()
+    
+    # !!! temporarily changing this to a run closer to the start of where
+    # proper data was first collected
+    filename = 'T071217_0001.txt'
+    f = open('../data_ucn/monitor_detector/' + filename)
+    lines = f.readlines()
+    f.close()
+    
+    date_time = filename[1:3].zfill(2) + \
+                        '.12.2017 ' + \
+                        lines[26][15:23]
+
+    pattern = '%d.%m.%Y %H:%M:%S'
+    start_time = int(time.mktime(time.strptime(date_time, pattern)))
+    
+    return start_time
+
+###############################################################################
+###############################################################################
+
 def load_main(config, run_type, raw_unix_time_flag = False):
     """A function to load data and sum counts for runs of a given
         configuration and pre-storage time
@@ -422,7 +455,7 @@ def load_monitor():
     """    
 
     # get the start time
-    start_time = get_start_time()
+    start_time = get_monitor_start_time()
 
     # initialize an array to hold the data
     monitor_data = np.empty((0,4), float)

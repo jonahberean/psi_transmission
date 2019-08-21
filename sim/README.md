@@ -1,13 +1,11 @@
-# TR_norm_in
+# sim
 
-STL files are in the STL folder.
+All analysis, inputs and outputs from simulations are contained in this directory. 
 
-## Questions
+## Input
 
-1) How do we appropriately choose the number of particles for simulation, and the maximum simulation time? I'm just borrowing Stewart's choices for now. Are these OK?
-2) For now, I will just tune the diffuse reflection probability of NiMo, since that is the material of the source, plexi guides, and pre-storage volume. It's presently set to zero, how can we perform this tuning iteratively? 
+There are directories for each configuration, labelled by guide and pre-storage time. The input directories have the 'in' suffix. These directories contain the STL files for the configuration model, the various config*.in files for PENTrack, and corresponding batch*.sh files for running on computecanada clusters. There are also materials*.in files corresponding to each config*.in
 
-## Tasks
+## Output
 
-As a proof of concept, we should submit a batch that simulates the TR_norm configuration at 5, 20, and 100s storage times. Need help here.
-
+There are directories labelled by configuration AND pre-storage time for all the outputs. Refer to the simAnalysis.py script within each of these directories for detail on the output data and performed analysis.
