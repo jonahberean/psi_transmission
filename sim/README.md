@@ -9,3 +9,7 @@ There are directories for each configuration, labelled by guide and pre-storage 
 ## Output
 
 There are directories labelled by configuration AND pre-storage time for all the outputs. Refer to the simAnalysis.py script within each of these directories for detail on the output data and performed analysis.
+
+## Archive
+
+Just old simulation files that I am no longer using.
