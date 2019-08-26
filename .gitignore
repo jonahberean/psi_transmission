@@ -10,6 +10,3 @@ data_sim/
 
 # ignore my folder of images
 img/
-
-# sim directory
-sim/

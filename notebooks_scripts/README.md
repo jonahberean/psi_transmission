@@ -36,9 +36,9 @@ Storage lifetime is computed for every configuration, and found to have generall
 
 Transmission measurements are produced for each configuration.
 
-## time_constant
+## PENTrack_simulations
 
-Necessary for the simulations, the time constant of the decay following the mauin detection peak is analyzed, across various configurations and pre-storage times.
+Analysis of simulated data alongside experimental data
 
 ## workspace
 
