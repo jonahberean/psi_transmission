@@ -1,6 +1,7 @@
 # ignore the data folders
 data_ucn/
 data_p_beam/
+data_sim/
 
 # ignore the extra stuff
 .eggs/

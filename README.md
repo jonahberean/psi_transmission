@@ -19,7 +19,7 @@ There are .html, .txt, and .pdf versions of the elog available in the **elog** s
 
 ## notebooks and scripts
 
-In the **notebooks** and **scripts** folders, there are tools and demonstrations of the pre-storage lifetime and transmission analyses performed. Refer to the self-contained documentation for details. If trouble is experienced in viewing the notebooks on Github directly, please use [nbviewer](https://nbviewer.jupyter.org/)
+In the **notebooks** and **scripts** folder, there are tools and demonstrations of the pre-storage lifetime and transmission analyses performed. Refer to the self-contained documentation for details. If trouble is experienced in viewing the notebooks on Github directly, please use [nbviewer](https://nbviewer.jupyter.org/)
 
 ## documents
 
