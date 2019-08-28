@@ -61,12 +61,12 @@ def sim_tau(config, run_type, diffuse_probability):
     # open the appropriate file
     filename = '../data_sim/' + config + '_' + run_type + \
                   '_dp' + str(diffuse_probability).zfill(2) + '.root'
-    print(filename)
-    f = root_open(filename)
-    # print data information
+    
     print('#####')
-    print(config + ', ' + run_type + ', dp = {}'.format(diffuse_probability))
+    print(filename)
     print('#####\n')
+    
+    f = root_open(filename)
     # get the neutronend tree
     end = f.Get('neutronend')
 
@@ -88,9 +88,17 @@ def sim_tau(config, run_type, diffuse_probability):
     canvas.Draw()
 
     # fitting
-    fit_start = 8 + 8.6 + int(run_type[1:4]) + 4
-    fit_end   = fit_start + 20
-    print('fitting range = [{}, {}]\n'.format(fit_start, fit_end))
+    # times relevant for fitting window selection
+    irradiate_time = 8
+    fill_time = 8.6
+    buffer_time = 4
+
+    # time length over which the fit will span
+    fit_span_time = 20
+    
+    fit_start = irradiate_time + fill_time + int(run_type[1:4]) + buffer_time
+    fit_end   = fit_start + fit_span_time
+#     print('fitting range = [{}, {}]\n'.format(fit_start, fit_end))
     
 #     TF1("f1","[0]*x*sin([1]*x)",-3,3);
     f1 = ROOT.TF1("m1","exp([0]-1/[1]*x)", fit_start, fit_end)
@@ -100,7 +108,7 @@ def sim_tau(config, run_type, diffuse_probability):
 #     redchi = 1
     
     # set the axis ranges for viewability
-    h1.GetXaxis().SetRangeUser(0, fit_end + 20)
+    h1.GetXaxis().SetRangeUser(0, 400)
     
     # get the slope, or inverse tau, parameter
     slope = ufloat(f1.GetParameter(1), f1.GetParError(1))

@@ -27,12 +27,7 @@ from lmfit import Model
 
 from IPython import get_ipython
 ipython = get_ipython()
-# if you use your own separate scripts with function definitions
-# these commands make your notebook grab updates from those script
-# files every time you run a code cell in the notebook. saves time.
-ipython.magic("load_ext autoreload")
-ipython.magic("autoreload 2")
-logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
 
 # for plotting
 import matplotlib as mpl
@@ -840,3 +835,128 @@ def sD2_normalize(arr, norm_dict, run_type):
     arr[:,3] = unumpy.std_devs(uarr)
 
     return arr
+
+###############################################################################
+###############################################################################
+
+# exponential function
+def expo(x, p0, p1):
+    return np.exp(p0 - 1 / (p1) * x)
+
+###############################################################################
+###############################################################################
+
+def fit_exp_detection_tail():
+
+    # dictionary to hold time constant values
+    tau_dict   = {} 
+
+    # dictionary to hold p1 values
+    exp_p1_dict = {}
+
+    fig, ax = plt.subplots()
+    ax_c = plt.gca()
+
+    # times relevant for fitting window selection
+    irradiate_time = 8
+    fill_time = 8.6
+    buffer_time = 4
+
+    # time length over which the fit will span
+    fit_span_time = 20
+
+    for config in ['NOMI', 'DISK']:
+
+        color = next(ax_c._get_lines.prop_cycler)['color']
+
+        for run_type in ['s005', 's020', 's100']:
+
+            # we'll save tau and error
+            tau_dict[config, run_type] = np.empty((0,3), float)
+
+            for filename in os.listdir('../data_ucn/main_detector_sorted'):
+
+                # Only the files matching our desired configuration and run 
+                # type are selected. The '.tof' condition is just so we 
+                # don't perform the analysis twice per run (since it would
+                # otherwise match to the .tof and the .txt files)
+                if ((config in filename) and (run_type in filename) and 
+                ('.tof' in filename)):
+
+                    # The data is retrieved from the .tof file
+                    arr = np.loadtxt('../data_ucn/main_detector_sorted/' + 
+                                            filename[0:22] + '.tof',
+                                            usecols = (0,1))
+
+                    # times in seconds, specific to each run
+                    pre_storage_time = float(run_type[1:4])
+
+                    # compute the fit start and end times
+                    fit_start_time = irradiate_time + fill_time + pre_storage_time + buffer_time
+                    fit_end_time   = fit_start_time + fit_span_time
+
+                    # the experimental data is binned into 0.1s bins, and lmfit requires
+                    # that we pass it the array we want fitted. We need to multiply these
+                    # times to get the right indices for slicing the arrays
+                    fit_start_index = int(fit_start_time * 10)
+                    fit_end_index   = int(fit_end_time * 10)
+
+                    # we get the arrays of counts and time, multiplying the values of t by 
+                    # 0.1 to get it in seconds.
+                    c = arr[fit_start_index:fit_end_index, 1]
+                    t = arr[fit_start_index:fit_end_index,0] * 0.1
+
+                    # construct weights, we deal with entries = 0 by giving them 0 weight
+                    weights = np.zeros(np.shape(c))
+                    for i in range(0,np.shape(c)[0]):
+                        if (c[i] != 0):
+                            weights[i] = 1 / np.sqrt(c[i])
+                        else:
+                            weights[i] = 0
+
+                    gmodel = Model(expo)
+                    result = gmodel.fit(c, x=t, p0=80, p1=3, weights = weights)
+
+                    tau_dict[config, run_type] = np.append(
+                        tau_dict[config, run_type], 
+                        [[result.params['p1'].value, result.params['p1'].stderr, result.redchi]],
+                        axis=0)
+
+            # finished with given [config, run_type]
+            # generate uncertainty array of data set, calculate mean, add to dict
+            arr = tau_dict[config, run_type]
+            uarr = unumpy.umatrix(arr[:,0], arr[:,1])
+            ave_tau = uarr.mean(1)[0,0]
+            exp_p1_dict[config, run_type] = ave_tau
+
+            # average the redchi of all the fits, save to dict
+            exp_p1_dict[config, run_type, 'redchi'] = arr[:,2].mean()
+
+            storage_time = int(run_type[1:-1])
+
+            # add mean value to plot
+        #         JP-style
+            if (config == 'DISK'):
+
+                ax.errorbar(storage_time * 10, ave_tau.nominal_value, yerr = ave_tau.std_dev, 
+                              fmt = 'o', label = config, color = color)
+
+        #         TRIUMF-style
+            else:
+                ax.errorbar(storage_time * 10, ave_tau.nominal_value, yerr = ave_tau.std_dev, 
+                              fmt = 'o', label = config, color = color)
+
+            print('(' + config + ',' + run_type + '): tau = {}, ave redchi = {}'.format(ave_tau,
+                                                                                       arr[:,2].mean()))
+            
+    # presentation stuff
+    ax.set_ylabel(r'$\tau$ (s)', fontsize = 14);
+    ax.set_xlabel('Pre-storage Time (s)', fontsize = 14)
+    ax.legend();
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    handles, labels = ax.get_legend_handles_labels()
+    by_label = OrderedDict(zip(labels, handles))
+    ax.legend(by_label.values(), by_label.keys());   
+    fig.savefig('../img/all_norm_tail_fits.pdf')
+    
+    return exp_p1_dict
