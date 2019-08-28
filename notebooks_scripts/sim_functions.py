@@ -59,9 +59,10 @@ def sim_tau(config, run_type, diffuse_probability):
         canvas -- the drawing canvas used for the PyROOT plot
     """
     # open the appropriate file
-    f = root_open('../data_sim/' + config + '_' + run_type + 
-                  '_dp' + str(diffuse_probability).zfill(2) + '.root')
-    
+    filename = '../data_sim/' + config + '_' + run_type + \
+                  '_dp' + str(diffuse_probability).zfill(2) + '.root'
+    print(filename)
+    f = root_open(filename)
     # print data information
     print('#####')
     print(config + ', ' + run_type + ', dp = {}'.format(diffuse_probability))
@@ -88,12 +89,15 @@ def sim_tau(config, run_type, diffuse_probability):
 
     # fitting
     fit_start = 8 + 8.6 + int(run_type[1:4]) + 4
-    fit_end   = fit_start + 55
+    fit_end   = fit_start + 20
     print('fitting range = [{}, {}]\n'.format(fit_start, fit_end))
     
-    f1 = ROOT.TF1("m1","expo", fit_start, fit_end)
-    f1.SetParameters(7,-0.2)
+#     TF1("f1","[0]*x*sin([1]*x)",-3,3);
+    f1 = ROOT.TF1("m1","exp([0]-1/[1]*x)", fit_start, fit_end)
+    f1.SetParameters(80,3)
     fit = h1.Fit(f1, 'SRL')
+    redchi = fit.Chi2() / fit.Ndf()
+#     redchi = 1
     
     # set the axis ranges for viewability
     h1.GetXaxis().SetRangeUser(0, fit_end + 20)
@@ -104,5 +108,6 @@ def sim_tau(config, run_type, diffuse_probability):
     h1.GetXaxis().SetTitle('Time [s]')
     h1.GetYaxis().SetTitle('UCN Counts')
     h1.Draw()
+#     canvas.Print('sim_tau.pdf')
     
-    return canvas, slope
+    return canvas, slope, redchi
