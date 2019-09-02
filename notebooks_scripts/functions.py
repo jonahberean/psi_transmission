@@ -8,6 +8,8 @@ and analyzing the data set from the 2017 PSI UCN transmission experiment.
 # statements begining with !pip are ones you might need to run once
 # just to install these packages.
 
+import ROOT
+
 import sys
 import os
 import logging
@@ -25,18 +27,10 @@ from uncertainties import *
 # !pip install lmfit
 from lmfit import Model
 
-from IPython import get_ipython
-ipython = get_ipython()
-
-
 # for plotting
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-ipython.magic("matplotlib inline")
-plt.rcParams['figure.dpi'] = 200
-ipython.magic("matplotlib inline")
-plt.rcParams['figure.dpi'] = 200
 
 ###############################################################################
 ###############################################################################
@@ -77,26 +71,19 @@ def storage_lt_fit(t, N_0, tau):
 
 
 def get_start_time():
-    """Retrieves the UNIX epoch time stamp of the first proton beam current
-    measurement, of the 2 second period data. This is used as a reference, 
-    t = 0, time for all analysis
+    """Retrieves the UNIX epoch time stamp of the first main detector run.
     
     Returns:
         int: the UNIX epoch time stamp
     """
     
-    # read the 8th of December data as a list of strings
-#     f = open('../data_p_beam/2_second/20171208.csv')
-#     lines = f.readlines()
-#     f.close()
-    
-    # !!! temporarily changing this to a run closer to the start of where
-    # proper data was first collected
-    filename = 'T081217_0022_NOMI_s020.txt'
+    # reads the file into a list of strings
+    filename = 'T081217_0022_85mm_norm_020s.txt'
     f = open('../data_ucn/main_detector_sorted/' + filename)
     lines = f.readlines()
     f.close()
     
+    # extracts date_time
     date_time = filename[1:3].zfill(2) + \
                         '.12.2017 ' + \
                         lines[26][15:23]
@@ -149,19 +136,19 @@ def load_main(config, run_type, raw_unix_time_flag = False):
     Arguments:
         config {string} -- A string that determines the experimental 
             configuration of the data to be loaded. The options are:
-                'NOMI' - nominal, guide-less
-                'JPTI' - JP Ti guide with NiP
-                'JPSU' - JP SUS guide with NiP
-                'DISK' - SS Disk
-                'GD01' - UGD01 guide
-                'GD03' - UGD03 guide
-                'EPSU' - EP SUS guide with NiP
+                '85mm_norm' - normalization in 85mm
+                '72mm_jpti' - JP Ti guide with NiP
+                '72mm_jpsu' - JP SUS guide with NiP
+                '72mm_norm' - normalization in 72mm
+                '85mm_ug01' - UGD01 guide
+                '85mm_ug03' - UGD03 guide
+                '85mm_ug19' - UGD19 guide, EP SUS guide with NiP
         run_type {string} -- A string that determines what type of data will be 
             loaded. The options are:
                 'shot' - direct shot measurements 
-                's005' - 5 second storage
-                's020' - 20 second storage
-                's100' - 100 second storage
+                '005s' - 5 second storage
+                '020s' - 20 second storage
+                '100s' - 100 second storage
         raw_unix_time_flag {boolean, optional} -- flag to give the option of 
             not correcting the time of each run based on the time of the
             experimental campaign. Can be useful for datetime plotting.
@@ -177,8 +164,8 @@ def load_main(config, run_type, raw_unix_time_flag = False):
                 3 - sqrt(N) error in number of UCN counts
                 4 - [day].[run number] of measurement
     """
-    # start_time is hard-coded here as the UNIX time stamp of the first 
-    # proton beam current measurement, of the 2 second data. 
+   
+    # retrieve start_time
     start_time = get_start_time()
 
     # instantiate a new numpy array 
@@ -194,7 +181,7 @@ def load_main(config, run_type, raw_unix_time_flag = False):
         ('.tof' in filename)):
 
             # grab from the text file associated with the run
-            f = open( '../data_ucn/main_detector_sorted/' + filename[0:22] 
+            f = open( '../data_ucn/main_detector_sorted/' + filename[0:27] 
                      + '.txt')  
             lines = f.readlines()
             f.close()
@@ -228,11 +215,11 @@ def load_main(config, run_type, raw_unix_time_flag = False):
 
             else:    
 
-                storage_time = int(run_type[1:4])
+                storage_time = int(run_type[0:3])
 
             # The data is retrieved from the .tof file
             count_data = np.loadtxt('../data_ucn/main_detector_sorted/' + 
-                                    filename[0:22] + '.tof',
+                                    filename[0:27] + '.tof',
                                     usecols = (1))
 
             # various cuts to the time-of-flight spectra are made
@@ -322,29 +309,27 @@ def load_all_main(norm_flag = True, raw_unix_time_flag = False):
         dict -- a dictionary of arrays of the same structure as is returned by
         load_data(). The key pairs to be used are:
         key 0: config {string} -- The options are:
-            'NOMI' - nominal, guide-less
-            'JPTI' - JP Ti guide with NiP
-            'JPSU' - JP SUS guide with NiP
-            'DISK' - SS Disk
-            'GD01' - UGD01 guide
-            'GD03' - UGD03 guide
-            'EPSU' - EP SUS guide with NiP
-            'all'  - all of the above
+                '85mm_norm' - normalization in 85mm
+                '72mm_jpti' - JP Ti guide with NiP
+                '72mm_jpsu' - JP SUS guide with NiP
+                '72mm_norm' - normalization in 72mm
+                '85mm_ug01' - UGD01 guide
+                '85mm_ug03' - UGD03 guide
+                '85mm_ug19' - UGD19 guide, EP SUS guide with NiP
         key 1: run_type {string} -- The options are:
-            'shot' - direct shot measurements 
-            's005' - 5 second storage
-            's020' - 20 second storage
-            's100' - 100 second storage
-            'all'  - all of the above
+                'shot' - direct shot measurements 
+                '005s' - 5 second storage
+                '020s' - 20 second storage
+                '100s' - 100 second storage
 
         dict -- dictionary of values (unumpy ufloat object) 
-        of the results from the sD2 losses normalization. The key pairs to be 
+        of the results from the source normalization. The key pairs to be 
         used are:
-        key 0: run_type {string} -- The options are:
-            'shot' - direct shot measurements 
-            's005' - 5 second storage
-            's020' - 20 second storage
-            's100' - 100 second storage
+        key 1: run_type {string} -- The options are:
+                'shot' - direct shot measurements 
+                '005s' - 5 second storage
+                '020s' - 20 second storage
+                '100s' - 100 second storage
         key 1: parameter {string} -- The options are:
             'N_0'     - counts at time 0 +/- error 
             'y'       - loss rate +/- error
@@ -352,8 +337,9 @@ def load_all_main(norm_flag = True, raw_unix_time_flag = False):
             'nfree'   - degrees of freedom
     """
     # instantiate configuration and run type lists
-    config_list = ['JPTI', 'JPSU', 'DISK', 'GD01', 'GD03', 'EPSU']
-    run_type_list = ['shot', 's005', 's020', 's100']
+    config_list = ['72mm_jpti', '72mm_jpsu', '72mm_norm', '85mm_ug01', 
+                   '85mm_ug03', '85mm_ug19']
+    run_type_list = ['shot', '005s', '020s', '100s']
 
     # instantiate dictionary to hold all main detector data
     data_dict = {}
@@ -369,7 +355,7 @@ def load_all_main(norm_flag = True, raw_unix_time_flag = False):
 
             # load the main detector data for the TRIUMF-style normalization
             # configuration
-            arr = load_main('NOMI', run_type, raw_unix_time_flag)
+            arr = load_main('85mm_norm', run_type, raw_unix_time_flag)
 
             ### Using lmfit to perfom fit of source norm data
             t = arr[:, 0]
@@ -395,21 +381,10 @@ def load_all_main(norm_flag = True, raw_unix_time_flag = False):
             # plt.plot(t, result.best_fit, 'r-')
             # plt.show()
 
-            ### Used to use curve_fit for this
-            # get the normaliization fit parameters
-            # popt, pcov = curve_fit(linear_fit, arr[:,0], arr[:,2], 
-            #                     sigma = arr[:,3], absolute_sigma = True)
-            
-            # saving the fit results to the dictionary, as uncertainty objects
-            # norm_dict[run_type, 'N_0'] = ufloat(popt[0], 
-            #                                     np.sqrt(np.diag(pcov))[0])
-            # norm_dict[run_type, 'y']   = ufloat(popt[1], 
-            #                                     np.sqrt(np.diag(pcov))[1])
-
             # normalize the very data used to calculate the normalization
             arr = sD2_normalize(arr, norm_dict, run_type)
 
-            data_dict['NOMI', run_type] = arr
+            data_dict['85mm_norm', run_type] = arr
 
     else:
 
@@ -840,14 +815,30 @@ def sD2_normalize(arr, norm_dict, run_type):
 ###############################################################################
 
 # exponential function
-def expo(x, p0, p1):
-    return np.exp(p0 - 1 / (p1) * x)
+def expo(x, p0, tau):
+    """exponential function with an explicit \tau parameter. Used in fitting 
+    the tail of the main UCN detection peak.
+    
+    Arguments:
+        x {float} -- time data
+        p0 {float} -- parameter
+        tau {float} -- time constant of the exponential decay
+    
+    Returns:
+        canvas -- the drawing canvas used for the PyROOT plot
+    """
+    return np.exp(p0 - 1 / (tau) * x)
 
 ###############################################################################
 ###############################################################################
 
 def fit_exp_detection_tail():
-
+    """A function that fits the time constant of the detection peak's tail
+    using python.
+    
+    Returns:
+        dict -- dictionary containing the fit result values
+    """
     # dictionary to hold time constant values
     tau_dict   = {} 
 
@@ -885,7 +876,7 @@ def fit_exp_detection_tail():
 
                     # The data is retrieved from the .tof file
                     arr = np.loadtxt('../data_ucn/main_detector_sorted/' + 
-                                            filename[0:22] + '.tof',
+                                            filename[0:27] + '.tof',
                                             usecols = (0,1))
 
                     # times in seconds, specific to each run
@@ -915,11 +906,11 @@ def fit_exp_detection_tail():
                             weights[i] = 0
 
                     gmodel = Model(expo)
-                    result = gmodel.fit(c, x=t, p0=80, p1=3, weights = weights)
+                    result = gmodel.fit(c, x=t, p0=80, tau=3, weights = weights)
 
                     tau_dict[config, run_type] = np.append(
                         tau_dict[config, run_type], 
-                        [[result.params['p1'].value, result.params['p1'].stderr, result.redchi]],
+                        [[result.params['tau'].value, result.params['tau'].stderr, result.redchi]],
                         axis=0)
 
             # finished with given [config, run_type]
@@ -960,3 +951,6 @@ def fit_exp_detection_tail():
     fig.savefig('../img/all_norm_tail_fits.pdf')
     
     return exp_p1_dict
+
+###############################################################################
+###############################################################################
