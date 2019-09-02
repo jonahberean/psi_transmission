@@ -34,7 +34,7 @@ All of the monitor detector data, in the same format as that of the main detecto
 
 #### main_detector_sorted/
 
-This folder contains both .tof and .txt files for every run that is used in the analysis. This list was produced after inspection of the elog and the data itself. Every file has been renamed according to the following convention: **TDDMMYY_XXXX_CONF_TYPE** where the 'TDDMMYY_XXXX' is the same as described above, 'CONF' labels the configuration of the run, and 'TYPE' labels the type of run, either direct shot or specific storage time. The utility of this naming scheme and organizational structure is described in the Jupyter notebook titled **sorting_data**, to which the reader is referred.
+This folder contains both .tof and .txt files for every run that is used in the analysis. This list was produced after inspection of the elog and the data itself. Every file has been renamed according to the convention described in the sorting_data.ipynb notebook file. Use it as a reference.
 
 #### main_detector_sorted_tof_txt/
 
@@ -92,4 +92,4 @@ A git submodule linking to the repository containing a report on the analysis pe
 
 ## sim_submit
 
-Submission files for simulation. There are config files, materials files, and scripts for running in parallel on the cluster
+Submission files for simulation. There are config files, materials files, and scripts for running in parallel on the cluster. 
