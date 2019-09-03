@@ -856,11 +856,11 @@ def fit_exp_detection_tail():
     # time length over which the fit will span
     fit_span_time = 20
 
-    for config in ['NOMI', 'DISK']:
+    for config in ['85mm_norm', '72mm_norm']:
 
         color = next(ax_c._get_lines.prop_cycler)['color']
 
-        for run_type in ['s005', 's020', 's100']:
+        for run_type in ['005s', '020s', '100s']:
 
             # we'll save tau and error
             tau_dict[config, run_type] = np.empty((0,3), float)
@@ -880,7 +880,7 @@ def fit_exp_detection_tail():
                                             usecols = (0,1))
 
                     # times in seconds, specific to each run
-                    pre_storage_time = float(run_type[1:4])
+                    pre_storage_time = float(run_type[0:3])
 
                     # compute the fit start and end times
                     fit_start_time = irradiate_time + fill_time + pre_storage_time + buffer_time

@@ -44,7 +44,19 @@ the sorted_tof_txt contains the dame data as in the 12 folder, but the files are
 
 ## elog
 
-There are .html, .txt, and .pdf versions of the elog available in the **elog** sub-folder.
+There are .html, .txt, and .pdf versions of the elog available in the **elog** sub-folder. The naming convention for configurations in the elog is different than my naming convention. The following table presents the conversion:
+
+Elog Name                                     | My Name  |                          
+---                                           | ---      | 
+first guide (Japanese SS with NiP coating)    | 72 mm SUS Guide with NiP |                           
+second guide (Japanese Ti with NiP coating)   | 72 mm SUS Guide with NiP |
+SS disk                                       | 72 mm Normalization, No Guide|
+two flanges (normally connected to TRIUMF guides) in order to perform a normalization measurement | 85 mm Normalization, no guide |
+UGD01                                         | UGD01
+UGD03                                         | UGD03
+third TRIUMF guide (ep with NiP coating)      | UGD19|
+ 
+This conversion can also be inferred from looking at the run list provided in sorting_data.ipynb
 
 ## notebooks and scripts
 
@@ -78,7 +90,7 @@ If trouble is experienced in viewing the notebooks on Github directly, please us
 
 - the transmission is calculated for the various guides
 
-### PENTrack_simulation
+### sims
 
 - the simulation data is analysed alongside main detector data
 
